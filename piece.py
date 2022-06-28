@@ -59,7 +59,6 @@ class Piece:
         return 0 <= x < 8 and 0 <= y < 8
 
 
-
 class Pawn(Piece):
     img = 0
 
@@ -75,13 +74,19 @@ class Pawn(Piece):
         if self.color == "b":
             sign = 1
 
-        moves = []
+        moves = set()
         
         if self.isLegal(x, y+sign) and board[y+sign][x] == 0:
-            moves.append((y+sign, x))
+            moves.add((y+sign, x))
             if self.first and board[y + 2*sign][x] == 0:
-                moves.append((y + 2*sign, x))
+                moves.add((y + 2*sign, x))
         
+        if self.isLegal(x+1, y+sign) and board[y+sign][x+1] != 0 and board[y+sign][x+1].color != board[y][x].color:
+            moves.add((y+sign, x+1))
+        
+        if self.isLegal(x-1, y+sign) and board[y+sign][x-1] != 0 and board[y+sign][x-1].color != board[y][x].color:
+            moves.add((y+sign, x-1))
+
         return moves
 
 class Rook(Piece):
@@ -94,17 +99,17 @@ class Rook(Piece):
         y = self.row
         x = self.column
 
-        moves = []
+        moves = set()
         
         for i in range(y+1, 8):
             if self.isLegal(x, i) == False:
                 break
             else:
                 if board[i][x] == 0:
-                    moves.append((i, x))
+                    moves.add((i, x))
                 else:
                     if board[i][x].color != board[y][x].color:
-                        moves.append((i, x))
+                        moves.add((i, x))
                     break
 
         for i in range(y-1, -1, -1):
@@ -112,10 +117,10 @@ class Rook(Piece):
                 break
             else:
                 if board[i][x] == 0:
-                    moves.append((i, x))
+                    moves.add((i, x))
                 else:
                     if board[i][x].color != board[y][x].color:
-                        moves.append((i, x))
+                        moves.add((i, x))
                     break
         
         for i in range(x+1, 8):
@@ -123,10 +128,10 @@ class Rook(Piece):
                 break
             else:
                 if board[y][i] == 0:
-                    moves.append((y, i))
+                    moves.add((y, i))
                 else:
                     if board[y][i].color != board[y][x].color:
-                        moves.append((y, i))
+                        moves.add((y, i))
                     break
         
         for i in range(x-1, -1, -1):
@@ -134,10 +139,10 @@ class Rook(Piece):
                 break
             else:
                 if board[y][i] == 0:
-                    moves.append((y, i))
+                    moves.add((y, i))
                 else:
                     if board[y][i].color != board[y][x].color:
-                        moves.append((y, i))
+                        moves.add((y, i))
                     break
         
 
@@ -150,13 +155,13 @@ class Knight(Piece):
         y = self.row
         x = self.column
 
-        moves = []
+        moves = set()
         
         a = [-2, -1, 1, 2]
         for i in a:
             for j in a:
                 if abs(i) != abs(j) and self.isLegal(x+j, y+i) and (board[y+i][x+j] == 0 or board[y+i][x+j].color != self.color):
-                    moves.append((y+i, x+j))
+                    moves.add((y+i, x+j))
         
         return moves
 
@@ -167,7 +172,7 @@ class Bishop(Piece):
         y = self.row
         x = self.column
 
-        moves = []
+        moves = set()
         signs = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
 
         for (sign1, sign2) in signs:
@@ -178,10 +183,10 @@ class Bishop(Piece):
                     break
                 else:
                     if board[a][b] == 0:
-                        moves.append((a, b))
+                        moves.add((a, b))
                     else:
                         if board[a][b].color != board[y][x].color:
-                            moves.append((a, b))
+                            moves.add((a, b))
                         break
 
         return moves
@@ -194,7 +199,7 @@ class Queen(Piece):
         y = self.row
         x = self.column
 
-        moves = []
+        moves = set()
         signs = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
 
         for (sign1, sign2) in signs:
@@ -205,10 +210,10 @@ class Queen(Piece):
                     break
                 else:
                     if board[a][b] == 0:
-                        moves.append((a, b))
+                        moves.add((a, b))
                     else:
                         if board[a][b].color != board[y][x].color:
-                            moves.append((a, b))
+                            moves.add((a, b))
                         break
 
         for i in range(y+1, 8):
@@ -216,10 +221,10 @@ class Queen(Piece):
                 break
             else:
                 if board[i][x] == 0:
-                    moves.append((i, x))
+                    moves.add((i, x))
                 else:
                     if board[i][x].color != board[y][x].color:
-                        moves.append((i, x))
+                        moves.add((i, x))
                     break
 
         for i in range(y-1, -1, -1):
@@ -227,10 +232,10 @@ class Queen(Piece):
                 break
             else:
                 if board[i][x] == 0:
-                    moves.append((i, x))
+                    moves.add((i, x))
                 else:
                     if board[i][x].color != board[y][x].color:
-                        moves.append((i, x))
+                        moves.add((i, x))
                     break
         
         for i in range(x+1, 8):
@@ -238,10 +243,10 @@ class Queen(Piece):
                 break
             else:
                 if board[y][i] == 0:
-                    moves.append((y, i))
+                    moves.add((y, i))
                 else:
                     if board[y][i].color != board[y][x].color:
-                        moves.append((y, i))
+                        moves.add((y, i))
                     break
         
         for i in range(x-1, -1, -1):
@@ -249,10 +254,10 @@ class Queen(Piece):
                 break
             else:
                 if board[y][i] == 0:
-                    moves.append((y, i))
+                    moves.add((y, i))
                 else:
                     if board[y][i].color != board[y][x].color:
-                        moves.append((y, i))
+                        moves.add((y, i))
                     break
 
         return moves
@@ -261,4 +266,41 @@ class King(Piece):
     img = 5
     
     def valid_moves(self, board):
-        return []
+        y = self.row
+        x = self.column
+
+        attacked = set()
+
+        for r in range(8):
+            for c in range(8):
+                if board[r][c] != 0 and board[y][x].color != board[r][c].color:
+                    if type(board[r][c]) == Pawn:
+                        sign = -1
+                        if self.color == "b":
+                            sign = 1
+
+                        if self.isLegal(c+1, r+sign) and board[r+sign][c+1] != 0 and board[r+sign][c+1].color != board[r][c].color:
+                            attacked.add((r+sign, c+1))
+                        
+                        if self.isLegal(c-1, r+sign) and board[r+sign][c-1] != 0 and board[r+sign][c-1].color != board[r][c].color:
+                            attacked.add((r+sign, c-1))
+                    elif type(board[r][c]) != King:
+                        for m in board[r][c].valid_moves(board):
+                            attacked.add(m)
+                        # attacked.union(board[r][c].valid_moves(board))
+                    else:
+                        for i in range(-1, 2):
+                            for j in range(-1, 2):
+                                if (i != 0 or j != 0) and self.isLegal(r+i, c+j):
+                                    attacked.add((r+i, c+j))
+        
+        moves = set()
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                if (i != 0 or j != 0) and self.isLegal(y+i, x+j) and (board[y+i][x+j] == 0 or board[y+i][x+j].color != board[y][x].color):
+                    if (y+i, x+j) in attacked:
+                        pass
+                    else:
+                        moves.add((y+i, x+j))
+
+        return moves

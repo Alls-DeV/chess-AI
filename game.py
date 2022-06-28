@@ -51,10 +51,11 @@ def main():
                 x, y = click(pos)
                 chess_board.select(x, y)
                 
-                l = chess_board.board[y][x].valid_moves(chess_board.board)
-                print(l)
-                print(len(l))
-                print()
+                if(chess_board.board[y][x] != 0):
+                    l = chess_board.board[y][x].valid_moves(chess_board.board)
+                    print(l)
+                    print(len(l))
+                    print()
 
 
 
