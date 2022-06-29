@@ -4,7 +4,7 @@ from piece import *
 from constants import *
 from board import Board
 
-
+# 3:19:00
 board = pygame.transform.scale(pygame.image.load(os.path.join("images", "board.png")), (800, 800))
 
 def redraw_gameWindow():
@@ -12,13 +12,12 @@ def redraw_gameWindow():
 
 
     win.blit(board, (0, 0))
-    chess_board.draw(win, chess_board.board)
+    chess_board.draw(win)
     
     pygame.display.update()
 
 
 def click(pos):
-
     if RECT[0] < pos[0] < RECT[0] + RECT[2] and RECT[1] < pos[1] < RECT[1] + RECT[3]:
         x = pos[0] - RECT[0]
         y = pos[1] - RECT[1]
@@ -43,19 +42,12 @@ def main():
                 quit()
                 pygame.quit()
 
-            if event.type == pygame.MOUSEMOTION:
-                pass
-
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
+                chess_board.update_moves(chess_board.board)
                 x, y = click(pos)
                 chess_board.select(x, y)
                 
-                if(chess_board.board[y][x] != 0):
-                    l = chess_board.board[y][x].valid_moves(chess_board.board)
-                    print(l)
-                    print(len(l))
-                    print()
 
 
 

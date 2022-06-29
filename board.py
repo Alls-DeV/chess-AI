@@ -25,33 +25,52 @@ class Board:
         self.board[0][6] = Knight(0, 6, "b")
         self.board[0][7] = Rook(0, 7, "b")
 
-        self.board[7][0] = Rook(7, 0, "w")
-        self.board[7][1] = Knight(7, 1, "w")
-        self.board[7][2] = Bishop(7, 2, "w")
-        self.board[4][4] = Queen(4, 4, "w")
-        self.board[7][4] = King(7, 4, "w")
-        self.board[7][5] = Bishop(7, 5, "w")
-        self.board[7][6] = Knight(7, 6, "w")
+        # self.board[7][0] = Rook(7, 0, "w")
+        # self.board[7][1] = Knight(7, 1, "w")
+        # self.board[7][2] = Bishop(7, 2, "w")
+        # self.board[4][4] = Queen(4, 4, "w")
+        # self.board[7][4] = King(7, 4, "w")
+        # self.board[7][5] = Bishop(7, 5, "w")
+        # self.board[7][6] = Knight(7, 6, "w")
         self.board[7][7] = Rook(7, 7, "w")
     
-    def draw(self, win, board):
+    def update_moves(self, board):
         for i in range(self.rows):
             for j in range(self.columns):
                 if self.board[i][j] != 0:
-                    self.board[i][j].draw(win, board)
+                    self.board[i][j].update_valid_moves(board)
+    def draw(self, win):
+        for i in range(self.rows):
+            for j in range(self.columns):
+                if self.board[i][j] != 0:
+                    self.board[i][j].draw(win)
     
     def select(self, x, y):
+        prev = (-1, -1)
+        for i in range(self.rows):
+            for j in range(self.columns):
+                if self.board[i][j] != 0 and self.board[i][j].isSelected():
+                    prev = (i, j)
+        
+        if prev != (-1, -1) and (y, x) in self.board[prev[0]][prev[1]].move_list:
+            self.reset_selected()
+            self.move(prev, (y, x))
+        else:
+            self.reset_selected()
+            if self.board[y][x] != 0:
+                self.board[y][x].selected = True
+
+
+    def reset_selected(self):
         for i in range(self.rows):
             for j in range(self.columns):
                 if self.board[i][j] != 0:
                     self.board[i][j].selected = False
 
-        if self.board[y][x] != 0:
-            self.board[y][x].selected = True
-    
     def move(self, start, end):
-        removed = self.board[end[1]][end[0]]
-        self.board[end[1]][end[0]] = self.board[start[1]][start[0]]
-        self.board[start[1]][start[0]] = 0
-
+        removed = self.board[end[0]][end[1]]
+        self.board[end[0]][end[1]] = self.board[start[0]][start[1]]
+        self.board[start[0]][start[1]] = 0
+        self.board[end[0]][end[1]].row = end[0]
+        self.board[end[0]][end[1]].column = end[1]
         return removed

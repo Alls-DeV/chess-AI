@@ -30,6 +30,10 @@ class Piece:
         self.column = column
         self.color = color
         self.selected = False
+        self.move_list = set()
+
+    def update_valid_moves(self, board):
+        self.move_list = self.valid_moves(board)
 
     def move(self):
         pass
@@ -37,7 +41,7 @@ class Piece:
     def isSelected(self):
         return self.selected
 
-    def draw(self, win, board):
+    def draw(self, win):
         if self.color == "w":
             drawThis = white[self.img]
         else:
@@ -48,7 +52,7 @@ class Piece:
         
         if self.isSelected():
             pygame.draw.rect(win, RED, (x, y, 95, 95), 2)
-            for possible_move in self.valid_moves(board):
+            for possible_move in self.move_list:
                 i = round(RECT[0] + (possible_move[1] * (RECT[2]/8)))
                 j = round(RECT[1] + (possible_move[0] * (RECT[3]/8)))
                 pygame.draw.circle(win, RED, (i+50, j+50), 15)
