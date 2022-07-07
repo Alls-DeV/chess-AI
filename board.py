@@ -12,9 +12,9 @@ class Board:
 
         self.board = [[0 for _ in range(8)] for _ in range(self.rows)]
         
-        # for i in range(8):
-            # self.board[1][i] = Pawn(1, i, "w")
-            # self.board[6][i] = Pawn(6, i, "w")
+        for i in range(8):
+            self.board[1][i] = Pawn(1, i, "b")
+            self.board[6][i] = Pawn(6, i, "w")
 
         self.board[0][0] = Rook(0, 0, "b")
         self.board[0][1] = Knight(0, 1, "b")
@@ -29,7 +29,7 @@ class Board:
         # self.board[7][1] = Knight(7, 1, "w")
         # self.board[7][2] = Bishop(7, 2, "w")
         # self.board[4][4] = Queen(4, 4, "w")
-        # self.board[7][4] = King(7, 4, "w")
+        self.board[7][4] = King(7, 4, "w")
         # self.board[7][5] = Bishop(7, 5, "w")
         # self.board[7][6] = Knight(7, 6, "w")
         self.board[7][7] = Rook(7, 7, "w")
@@ -39,6 +39,7 @@ class Board:
             for j in range(self.columns):
                 if self.board[i][j] != 0:
                     self.board[i][j].update_valid_moves(board)
+    
     def draw(self, win):
         for i in range(self.rows):
             for j in range(self.columns):
@@ -73,4 +74,6 @@ class Board:
         self.board[start[0]][start[1]] = 0
         self.board[end[0]][end[1]].row = end[0]
         self.board[end[0]][end[1]].column = end[1]
+        if(type(self.board[end[0]][end[1]]) in {King, Pawn, Rook}):
+            self.board[end[0]][end[1]].first = False
         return removed

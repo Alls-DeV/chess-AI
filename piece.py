@@ -35,9 +35,6 @@ class Piece:
     def update_valid_moves(self, board):
         self.move_list = self.valid_moves(board)
 
-    def move(self):
-        pass
-
     def isSelected(self):
         return self.selected
 
@@ -269,39 +266,40 @@ class Queen(Piece):
 class King(Piece):
     img = 5
     
+    def __init__(self, row, column, color):
+        super().__init__(row, column, color)
+        self.first = True
+
     def valid_moves(self, board):
         y = self.row
         x = self.column
 
         attacked = set()
-
         for r in range(8):
             for c in range(8):
-                if board[r][c] != 0 and board[y][x].color != board[r][c].color:
+                if board[r][c] != 0 and self.color != board[r][c].color:
                     if type(board[r][c]) == Pawn:
                         sign = -1
-                        if self.color == "b":
+                        if self.color == "w":
                             sign = 1
 
-                        if self.isLegal(c+1, r+sign) and board[r+sign][c+1] != 0 and board[r+sign][c+1].color != board[r][c].color:
+                        if self.isLegal(c+1, r+sign):
                             attacked.add((r+sign, c+1))
                         
-                        if self.isLegal(c-1, r+sign) and board[r+sign][c-1] != 0 and board[r+sign][c-1].color != board[r][c].color:
+                        if self.isLegal(c-1, r+sign):
                             attacked.add((r+sign, c-1))
                     elif type(board[r][c]) != King:
                         for m in board[r][c].valid_moves(board):
                             attacked.add(m)
-                        # attacked.union(board[r][c].valid_moves(board))
                     else:
                         for i in range(-1, 2):
                             for j in range(-1, 2):
                                 if (i != 0 or j != 0) and self.isLegal(r+i, c+j):
                                     attacked.add((r+i, c+j))
-        
         moves = set()
         for i in range(-1, 2):
             for j in range(-1, 2):
-                if (i != 0 or j != 0) and self.isLegal(y+i, x+j) and (board[y+i][x+j] == 0 or board[y+i][x+j].color != board[y][x].color):
+                if (i != 0 or j != 0) and self.isLegal(y+i, x+j) and (board[y+i][x+j] == 0 or board[y+i][x+j].color != self.color):
                     if (y+i, x+j) in attacked:
                         pass
                     else:
