@@ -9,14 +9,14 @@ Chess game written in python with the pygame library.
 ```bash
 sudo apt install python3-pip
 pip3 -m install --user pygame
-python3 game.py
+python3 main.py
 ```
 
 ### Arch
 ```bash
 sudo pacman -S python-pip
 pip -m install --user pygame
-python game.py
+python main.py
 ```
 ###### If pygame fails to install try:
 
@@ -37,6 +37,6 @@ python game.py
 Then, Open a command prompt window:
 ```
 pip -m install --user pygame
-python game.py
+python main.py
 ```
 ---

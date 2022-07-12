@@ -1,308 +1,297 @@
 import pygame
 import os
-from constants import RECT, RED
+from constants import *
 
-wP = pygame.image.load(os.path.join("images", "wP.png"))
-wR = pygame.image.load(os.path.join("images", "wR.png"))
-wN = pygame.image.load(os.path.join("images", "wN.png"))
-wB = pygame.image.load(os.path.join("images", "wB.png"))
-wQ = pygame.image.load(os.path.join("images", "wQ.png"))
-wK = pygame.image.load(os.path.join("images", "wK.png"))
-bP = pygame.image.load(os.path.join("images", "bP.png"))
-bR = pygame.image.load(os.path.join("images", "bR.png"))
-bN = pygame.image.load(os.path.join("images", "bN.png"))
-bB = pygame.image.load(os.path.join("images", "bB.png"))
-bQ = pygame.image.load(os.path.join("images", "bQ.png"))
-bK = pygame.image.load(os.path.join("images", "bK.png"))
+# load images of pieces into two list
+dir = "assets/piece_set/california"
+wP = pygame.image.load(os.path.join(dir, "wP.png"))
+wR = pygame.image.load(os.path.join(dir, "wR.png"))
+wN = pygame.image.load(os.path.join(dir, "wN.png"))
+wB = pygame.image.load(os.path.join(dir, "wB.png"))
+wQ = pygame.image.load(os.path.join(dir, "wQ.png"))
+wK = pygame.image.load(os.path.join(dir, "wK.png"))
+bP = pygame.image.load(os.path.join(dir, "bP.png"))
+bR = pygame.image.load(os.path.join(dir, "bR.png"))
+bN = pygame.image.load(os.path.join(dir, "bN.png"))
+bB = pygame.image.load(os.path.join(dir, "bB.png"))
+bQ = pygame.image.load(os.path.join(dir, "bQ.png"))
+bK = pygame.image.load(os.path.join(dir, "bK.png"))
 
 white = [wP, wR, wN, wB, wQ, wK]
 black = [bP, bR, bN, bB, bQ, bK]
 
+# resize images
 for i in range(6):
-    white[i] = pygame.transform.scale(white[i], (95, 95))
-    black[i] = pygame.transform.scale(black[i], (95, 95))
+    white[i] = pygame.transform.scale(white[i], (SQUARE_SIZE, SQUARE_SIZE))
+    black[i] = pygame.transform.scale(black[i], (SQUARE_SIZE, SQUARE_SIZE))
+
 
 class Piece:
+    # represent the index of the image in the list white/black
     img = -1
 
-    def __init__(self, row, column, color):
-        self.row = row
-        self.column = column
-        self.color = color
-        self.selected = False
-        self.move_list = set()
-
-    def update_valid_moves(self, board):
-        self.move_list = self.valid_moves(board)
-
-    def isSelected(self):
-        return self.selected
-
-    def draw(self, win):
-        if self.color == "w":
-            drawThis = white[self.img]
-        else:
-            drawThis = black[self.img]
-
-        x = round(RECT[0] + (self.column * (RECT[2]/8)))
-        y = round(RECT[1] + (self.row * (RECT[3]/8)))
-        
-        if self.isSelected():
-            pygame.draw.rect(win, RED, (x, y, 95, 95), 2)
-            for possible_move in self.move_list:
-                i = round(RECT[0] + (possible_move[1] * (RECT[2]/8)))
-                j = round(RECT[1] + (possible_move[0] * (RECT[3]/8)))
-                pygame.draw.circle(win, RED, (i+50, j+50), 15)
-
-        win.blit(drawThis, (x, y))
     
-    def isLegal(self, x, y):
-        return 0 <= x < 8 and 0 <= y < 8
+    
+    def __init__(self, color):
+        self.color = color
+        self.move_set = set()
 
+    
+    
+    def draw(self, screen, position):
+        # assign the image
+        draw_this = white[self.img] if self.color == WHITE else black[self.img]
+
+        y, x = position[0]*SQUARE_SIZE, position[1]*SQUARE_SIZE
+        screen.blit(draw_this, (x, y))
+    
+
+
+
+    '''
+    check the validity of a move
+    '''
+    @staticmethod
+    
+    def est_legale(y, x):
+        return 0 <= y < 8 and 0 <= x < 8
 
 class Pawn(Piece):
     img = 0
 
-    def __init__(self, row, column, color):
-        super().__init__(row, column, color)
-        self.first = True
-        self.queen = False
     
-    def valid_moves(self, board):
-        y = self.row
-        x = self.column
-        sign = -1
-        if self.color == "b":
-            sign = 1
+    def __init__(self, color):
+        super().__init__(color)
 
-        moves = set()
-        
-        if self.isLegal(x, y+sign) and board[y+sign][x] == 0:
-            moves.add((y+sign, x))
-            if self.first and board[y + 2*sign][x] == 0:
-                moves.add((y + 2*sign, x))
-        
-        if self.isLegal(x+1, y+sign) and board[y+sign][x+1] != 0 and board[y+sign][x+1].color != board[y][x].color:
-            moves.add((y+sign, x+1))
-        
-        if self.isLegal(x-1, y+sign) and board[y+sign][x-1] != 0 and board[y+sign][x-1].color != board[y][x].color:
-            moves.add((y+sign, x-1))
+        # check if the pawn has moved
+        self.first_move = True
+    
 
-        return moves
+    def valid_moves(self, board, position):
+        y, x = position[0], position[1]
+
+        self.move_set = set()
+
+        # white pawn go up while black go down, with sign I can control this
+        sign = -1 if self.color == WHITE else 1
+        
+        # check for the movement
+        if Piece.est_legale(y+sign, x) and board.matrix[y+sign][x] == 0:
+            self.move_set.add((y+sign, x))
+            if self.first_move and board.matrix[y + 2*sign][x] == 0:
+                self.move_set.add((y + 2*sign, x))
+        
+        # check for the capture
+        if Piece.est_legale(y+sign, x+1) and board.matrix[y+sign][x+1] != 0 and board.matrix[y+sign][x+1].color != board.matrix[y][x].color:
+            self.move_set.add((y+sign, x+1))
+        if Piece.est_legale(y+sign, x-1) and board.matrix[y+sign][x-1] != 0 and board.matrix[y+sign][x-1].color != board.matrix[y][x].color:
+            self.move_set.add((y+sign, x-1))
+
 
 class Rook(Piece):
     img = 1
-    def __init__(self, row, column, color):
-        super().__init__(row, column, color)
-        self.first = True
 
-    def valid_moves(self, board):
-        y = self.row
-        x = self.column
+    
+    def __init__(self, color):
+        super().__init__(color)
 
-        moves = set()
+        # flag for check if this rook can castle
+        self.first_move = True
+
+    
+    def valid_moves(self, board, position):
+        y, x = position[0], position[1]
         
+        self.move_set = set()
+
+        # TODO fare un while al posto di questo for while(est_legale)
+
+        # vertical up moves
         for i in range(y+1, 8):
-            if self.isLegal(x, i) == False:
+            if Piece.est_legale(i, x) == False:
                 break
             else:
-                if board[i][x] == 0:
-                    moves.add((i, x))
+                if board.matrix[i][x] == 0:
+                    self.move_set.add((i, x))
                 else:
-                    if board[i][x].color != board[y][x].color:
-                        moves.add((i, x))
+                    if board.matrix[i][x].color != board.matrix[y][x].color:
+                        self.move_set.add((i, x))
                     break
 
+        # vertical down moves
         for i in range(y-1, -1, -1):
-            if self.isLegal(x, i) == False:
+            if Piece.est_legale(i, x) == False:
                 break
             else:
-                if board[i][x] == 0:
-                    moves.add((i, x))
+                if board.matrix[i][x] == 0:
+                    self.move_set.add((i, x))
                 else:
-                    if board[i][x].color != board[y][x].color:
-                        moves.add((i, x))
+                    if board.matrix[i][x].color != board.matrix[y][x].color:
+                        self.move_set.add((i, x))
                     break
-        
-        for i in range(x+1, 8):
-            if self.isLegal(x, i) == False:
+        # al rigo 129 e 141 ho sostituito est_legale di x con y, mi sembrava sbagliato
+        # horizontal right moves
+        for j in range(x+1, 8):
+            if Piece.est_legale(y, j) == False:
                 break
             else:
-                if board[y][i] == 0:
-                    moves.add((y, i))
+                if board.matrix[y][j] == 0:
+                    self.move_set.add((y, j))
                 else:
-                    if board[y][i].color != board[y][x].color:
-                        moves.add((y, i))
+                    if board.matrix[y][j].color != board.matrix[y][x].color:
+                        self.move_set.add((y, j))
                     break
-        
-        for i in range(x-1, -1, -1):
-            if self.isLegal(x, i) == False:
-                break
-            else:
-                if board[y][i] == 0:
-                    moves.add((y, i))
-                else:
-                    if board[y][i].color != board[y][x].color:
-                        moves.add((y, i))
-                    break
-        
 
-        return moves
+        # horizontal left moves
+        for j in range(x-1, -1, -1):
+            if Piece.est_legale(y, j) == False:
+                break
+            else:
+                if board.matrix[y][j] == 0:
+                    self.move_set.add((y, j))
+                else:
+                    if board.matrix[y][j].color != board.matrix[y][x].color:
+                        self.move_set.add((y, j))
+                    break
 
 class Knight(Piece):
     img = 2
 
-    def valid_moves(self, board):
-        y = self.row
-        x = self.column
+    
+    def valid_moves(self, board, position):
+        y, x = position[0], position[1]
+        
+        self.move_set = set()
 
-        moves = set()
-        
-        a = [-2, -1, 1, 2]
-        for i in a:
-            for j in a:
-                if abs(i) != abs(j) and self.isLegal(x+j, y+i) and (board[y+i][x+j] == 0 or board[y+i][x+j].color != self.color):
-                    moves.add((y+i, x+j))
-        
-        return moves
+        jump = [-2, -1, 1, 2]
+        for i in jump:
+            for j in jump:
+                if abs(i) != abs(j) and Piece.est_legale(y+i, x+j) and (board.matrix[y+i][x+j] == 0 or board.matrix[y+i][x+j].color != self.color):
+                    self.move_set.add((y+i, x+j))
 
 class Bishop(Piece):
     img = 3
     
-    def valid_moves(self, board):
-        y = self.row
-        x = self.column
+    
+    def valid_moves(self, board, position):
+        y, x = position[0], position[1]
 
-        moves = set()
+        self.move_set = set()
+
+        # all the combination of the direction 
         signs = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
-
-        for (sign1, sign2) in signs:
-            for i in range(1, 8):
-                a = y+i*sign1
-                b = x+i*sign2
-                if self.isLegal(a, b) == False:
+        
+        # TODO forse pure qui posso sostituire con un while
+        for (sign_y, sign_x) in signs:
+            for k in range(1, 8):
+                a = y+k*sign_y
+                b = x+k*sign_x
+                if Piece.est_legale(a, b) == False:
                     break
                 else:
-                    if board[a][b] == 0:
-                        moves.add((a, b))
+                    if board.matrix[a][b] == 0:
+                        self.move_set.add((a, b))
                     else:
-                        if board[a][b].color != board[y][x].color:
-                            moves.add((a, b))
+                        if board.matrix[a][b].color != board.matrix[y][x].color:
+                            self.move_set.add((a, b))
                         break
-
-        return moves
 
 class Queen(Piece):
     img = 4
- 
     
-    def valid_moves(self, board):
-        y = self.row
-        x = self.column
+    
+    def valid_moves(self, board, position):
+        y, x = position[0], position[1]
 
-        moves = set()
+        self.move_set = set()
+
+        # all the combination of the direction for the diagonal moves
         signs = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
 
-        for (sign1, sign2) in signs:
+        for (sign_y, sign_x) in signs:
             for i in range(1, 8):
-                a = y+i*sign1
-                b = x+i*sign2
-                if self.isLegal(a, b) == False:
+                a = y+i*sign_y
+                b = x+i*sign_x
+                if Piece.est_legale(a, b) == False:
                     break
                 else:
-                    if board[a][b] == 0:
-                        moves.add((a, b))
+                    if board.matrix[a][b] == 0:
+                        self.move_set.add((a, b))
                     else:
-                        if board[a][b].color != board[y][x].color:
-                            moves.add((a, b))
+                        if board.matrix[a][b].color != board.matrix[y][x].color:
+                            self.move_set.add((a, b))
                         break
 
+        # TODO sostituire i for con while
+        # vertical up moves
         for i in range(y+1, 8):
-            if self.isLegal(x, i) == False:
+            if Piece.est_legale(i, x) == False:
                 break
             else:
-                if board[i][x] == 0:
-                    moves.add((i, x))
+                if board.matrix[i][x] == 0:
+                    self.move_set.add((i, x))
                 else:
-                    if board[i][x].color != board[y][x].color:
-                        moves.add((i, x))
+                    if board.matrix[i][x].color != board.matrix[y][x].color:
+                        self.move_set.add((i, x))
                     break
 
+        # vertical down moves
         for i in range(y-1, -1, -1):
-            if self.isLegal(x, i) == False:
+            if Piece.est_legale(i, x) == False:
                 break
             else:
-                if board[i][x] == 0:
-                    moves.add((i, x))
+                if board.matrix[i][x] == 0:
+                    self.move_set.add((i, x))
                 else:
-                    if board[i][x].color != board[y][x].color:
-                        moves.add((i, x))
+                    if board.matrix[i][x].color != board.matrix[y][x].color:
+                        self.move_set.add((i, x))
                     break
         
-        for i in range(x+1, 8):
-            if self.isLegal(x, i) == False:
+        # horizontal right moves
+        for j in range(x+1, 8):
+            if Piece.est_legale(y, j) == False:
                 break
             else:
-                if board[y][i] == 0:
-                    moves.add((y, i))
+                if board.matrix[y][j] == 0:
+                    self.move_set.add((y, j))
                 else:
-                    if board[y][i].color != board[y][x].color:
-                        moves.add((y, i))
-                    break
-        
-        for i in range(x-1, -1, -1):
-            if self.isLegal(x, i) == False:
-                break
-            else:
-                if board[y][i] == 0:
-                    moves.add((y, i))
-                else:
-                    if board[y][i].color != board[y][x].color:
-                        moves.add((y, i))
+                    if board.matrix[y][j].color != board.matrix[y][x].color:
+                        self.move_set.add((y, j))
                     break
 
-        return moves
+        # horizontal left moves
+        for j in range(x-1, -1, -1):
+            if Piece.est_legale(y, j) == False:
+                break
+            else:
+                if board.matrix[y][j] == 0:
+                    self.move_set.add((y, j))
+                else:
+                    if board.matrix[y][j].color != board.matrix[y][x].color:
+                        self.move_set.add((y, j))
+                    break
 
 class King(Piece):
     img = 5
     
-    def __init__(self, row, column, color):
-        super().__init__(row, column, color)
-        self.first = True
+    
+    def __init__(self, color):
+        super().__init__(color)
 
-    def valid_moves(self, board):
-        y = self.row
-        x = self.column
+        # flag for check if king can castle
+        self.first_move = True
 
-        attacked = set()
-        for r in range(8):
-            for c in range(8):
-                if board[r][c] != 0 and self.color != board[r][c].color:
-                    if type(board[r][c]) == Pawn:
-                        sign = -1
-                        if self.color == "w":
-                            sign = 1
+    
+    def valid_moves(self, board, position):
+        y, x = position[0], position[1]
 
-                        if self.isLegal(c+1, r+sign):
-                            attacked.add((r+sign, c+1))
-                        
-                        if self.isLegal(c-1, r+sign):
-                            attacked.add((r+sign, c-1))
-                    elif type(board[r][c]) != King:
-                        for m in board[r][c].valid_moves(board):
-                            attacked.add(m)
-                    else:
-                        for i in range(-1, 2):
-                            for j in range(-1, 2):
-                                if (i != 0 or j != 0) and self.isLegal(r+i, c+j):
-                                    attacked.add((r+i, c+j))
-        moves = set()
+        self.move_set = set()
+
         for i in range(-1, 2):
             for j in range(-1, 2):
-                if (i != 0 or j != 0) and self.isLegal(y+i, x+j) and (board[y+i][x+j] == 0 or board[y+i][x+j].color != self.color):
-                    if (y+i, x+j) in attacked:
+                if (i != 0 or j != 0) and Piece.est_legale(y+i, x+j) and (board.matrix[y+i][x+j] == 0 or board.matrix[y+i][x+j].color != self.color):
+                    # TODO controllare se puoi mettere not in
+                    if (y+i, x+j) in board.attacked:
                         pass
                     else:
-                        moves.add((y+i, x+j))
-
-        return moves
+                        self.move_set.add((y+i, x+j))
