@@ -54,6 +54,7 @@ class Board:
                 position = (y, x)
                 if tmp:
                     tmp.draw(screen, position)
+        
         # if a piece is selected show the possible moves
         if self.selected_pos != NULL_POSITION:
             y, x = self.selected_pos[0], self.selected_pos[1]
@@ -218,7 +219,7 @@ class Board:
                                 else:
                                     self.attacked.add((i, x))
                                     break
-                        # TODO while for
+
                         # horizontal right moves
                         for j in range(x+1, 8):
                             if Piece.est_legale(y, j) == False:
@@ -241,19 +242,18 @@ class Board:
                                     self.attacked.add((y, j))
                                     break
 
-
                     elif type(self.matrix[y][x]) == King:
                         for i in range(-1, 2):
                             for j in range(-1, 2):
                                 if (i != 0 or j != 0) and Piece.est_legale(y+i, x+j):
-                                    # TODO controllare se puoi mettere not in
                                     self.attacked.add((y+i, x+j))
+
 
     '''
     manage the interaction with the mouse button, like selecting or move piece
     '''
     def click(self, position):
-        y, x = position[1]//100, position[0]//100
+        y, x = position[1]//SQUARE_SIZE, position[0]//SQUARE_SIZE
         
         if self.matrix[y][x] != 0 and self.matrix[y][x].color == self.turn:
             self.selected_pos = (y, x)

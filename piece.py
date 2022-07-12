@@ -3,7 +3,7 @@ import os
 from constants import *
 
 # load images of pieces into two list
-dir = "assets/piece_set/california"
+dir = "assets/piece_set/alpha"
 wP = pygame.image.load(os.path.join(dir, "wP.png"))
 wR = pygame.image.load(os.path.join(dir, "wR.png"))
 wN = pygame.image.load(os.path.join(dir, "wN.png"))
@@ -31,12 +31,10 @@ class Piece:
     img = -1
 
     
-    
     def __init__(self, color):
         self.color = color
         self.move_set = set()
 
-    
     
     def draw(self, screen, position):
         # assign the image
@@ -46,13 +44,10 @@ class Piece:
         screen.blit(draw_this, (x, y))
     
 
-
-
     '''
     check the validity of a move
     '''
     @staticmethod
-    
     def est_legale(y, x):
         return 0 <= y < 8 and 0 <= x < 8
 
@@ -129,7 +124,7 @@ class Rook(Piece):
                     if board.matrix[i][x].color != board.matrix[y][x].color:
                         self.move_set.add((i, x))
                     break
-        # al rigo 129 e 141 ho sostituito est_legale di x con y, mi sembrava sbagliato
+
         # horizontal right moves
         for j in range(x+1, 8):
             if Piece.est_legale(y, j) == False:

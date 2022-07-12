@@ -5,6 +5,7 @@ from board import Board
 
 # initialize all imported pygame modules
 pygame.init()
+
 # define window and caption
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Chess")
