@@ -3,7 +3,7 @@ import os
 from constants import *
 
 # load images of pieces into two list
-dir = "assets/piece_set/alpha"
+dir = "assets/piece_set/california"
 wP = pygame.image.load(os.path.join(dir, "wP.png"))
 wR = pygame.image.load(os.path.join(dir, "wR.png"))
 wN = pygame.image.load(os.path.join(dir, "wN.png"))
@@ -39,7 +39,6 @@ class Piece:
     def draw(self, screen, position):
         # assign the image
         draw_this = white[self.img] if self.color == WHITE else black[self.img]
-
         y, x = position[0]*SQUARE_SIZE, position[1]*SQUARE_SIZE
         screen.blit(draw_this, (x, y))
     
@@ -98,8 +97,6 @@ class Rook(Piece):
         y, x = position[0], position[1]
         
         self.move_set = set()
-
-        # TODO fare un while al posto di questo for while(est_legale)
 
         # vertical up moves
         for i in range(y+1, 8):
@@ -176,7 +173,6 @@ class Bishop(Piece):
         # all the combination of the direction 
         signs = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
         
-        # TODO forse pure qui posso sostituire con un while
         for (sign_y, sign_x) in signs:
             for k in range(1, 8):
                 a = y+k*sign_y
@@ -217,7 +213,6 @@ class Queen(Piece):
                             self.move_set.add((a, b))
                         break
 
-        # TODO sostituire i for con while
         # vertical up moves
         for i in range(y+1, 8):
             if Piece.est_legale(i, x) == False:
@@ -286,7 +281,5 @@ class King(Piece):
             for j in range(-1, 2):
                 if (i != 0 or j != 0) and Piece.est_legale(y+i, x+j) and (board.matrix[y+i][x+j] == 0 or board.matrix[y+i][x+j].color != self.color):
                     # TODO controllare se puoi mettere not in
-                    if (y+i, x+j) in board.attacked:
-                        pass
-                    else:
+                    if (y+i, x+j) not in board.attacked:
                         self.move_set.add((y+i, x+j))

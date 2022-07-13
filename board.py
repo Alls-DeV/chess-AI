@@ -1,4 +1,5 @@
 import pygame
+import os
 from piece import Piece, Pawn, Rook, Knight, Bishop, Queen, King
 from constants import *
 
@@ -48,23 +49,43 @@ class Board:
     draw all the pieces on the screen
     '''
     def draw(self, screen):
+
+        # highlight last move
+        if self.last_move != NULL_POSITION:
+            img = pygame.image.load(os.path.join("assets", "yellow_square.png"))
+            img = pygame.transform.scale(img, (SQUARE_SIZE, SQUARE_SIZE))
+            screen.blit(img, (self.last_move[0][1]*SQUARE_SIZE, self.last_move[0][0]*SQUARE_SIZE))
+            screen.blit(img, (self.last_move[1][1]*SQUARE_SIZE, self.last_move[1][0]*SQUARE_SIZE))
+        
+        # if a piece is selected show the possible moves
+        if self.selected_pos != NULL_POSITION:
+            y, x = self.selected_pos[0], self.selected_pos[1]
+            selected_piece = self.matrix[y][x]
+
+            for possible_move in selected_piece.move_set:
+                # use a negative circle for the capture
+                if self.matrix[possible_move[0]][possible_move[1]]:
+                    img = pygame.image.load(os.path.join("assets", "green_circle_neg.png"))
+                    img = pygame.transform.scale(img, (SQUARE_SIZE, SQUARE_SIZE))
+                    screen.blit(img, (possible_move[1]*SQUARE_SIZE, possible_move[0]*SQUARE_SIZE))
+
+                # use a circle for the movement on an empty square
+                else:
+                    pygame.draw.circle(screen, GREEN, (possible_move[1]*SQUARE_SIZE + SQUARE_SIZE/2, possible_move[0]*SQUARE_SIZE + SQUARE_SIZE/2), 15)
+                    # TODO forse posso aggiungere delle impostazioni che mi permettono di far selezionare il colore
+                    # img = pygame.image.load(os.path.join("assets", "green_circle.png"))
+                    # img = pygame.transform.scale(img, (SQUARE_SIZE, SQUARE_SIZE))
+                    # screen.blit(img, (possible_move[1]*SQUARE_SIZE, possible_move[0]*SQUARE_SIZE))
+
+        
         for y in range(self.rows):
             for x in range(self.columns):
                 tmp = self.matrix[y][x]
                 position = (y, x)
                 if tmp:
                     tmp.draw(screen, position)
-        
-        # if a piece is selected show the possible moves
-        if self.selected_pos != NULL_POSITION:
-            y, x = self.selected_pos[0], self.selected_pos[1]
-            selected_piece = self.matrix[y][x]
-            pygame.draw.rect(screen, RED, (x*SQUARE_SIZE, y*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE), 2)
 
-            for possible_move in selected_piece.move_set:
-                pygame.draw.circle(screen, BLUE, (possible_move[1]*SQUARE_SIZE + SQUARE_SIZE/2, possible_move[0]*SQUARE_SIZE + SQUARE_SIZE/2), 15)
-    
-    
+
     '''
     update the possible moves of each piece on the board
     '''
@@ -276,11 +297,18 @@ class Board:
         self.last_move = ((self.selected_pos[0], self.selected_pos[1]), (end[0], end[1]))
         
         piece = self.matrix[self.selected_pos[0]][self.selected_pos[1]]
+
+        if type(piece) in {King, Pawn, Rook}:
+            piece.first_move = False
+        
+        # pawn promotion
+        if type(piece) == Pawn and ( (end[0] == 0 and piece.color == WHITE) or (end[0] == 7 and piece.color == BLACK) ):
+            piece = Queen(piece.color)
+
         self.matrix[end[0]][end[1]] = piece
         self.matrix[self.selected_pos[0]][self.selected_pos[1]] = 0
+
         
-        if(type(piece) in {King, Pawn, Rook}):
-            piece.first = False
 
         self.update_moves()
 

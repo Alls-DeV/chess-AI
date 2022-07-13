@@ -12,7 +12,7 @@ pygame.display.set_caption("Chess")
 
 # load chessboard
 dir = "assets/board_set"
-background = pygame.transform.scale(pygame.image.load(os.path.join(dir, "chessboard.jpg")), (WIDTH, HEIGHT))
+background = pygame.transform.scale(pygame.image.load(os.path.join(dir, "grey.jpg")), (WIDTH, HEIGHT))
 
 # necessary for capping the FPS
 clock = pygame.time.Clock()
