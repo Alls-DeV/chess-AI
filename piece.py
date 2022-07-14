@@ -1,29 +1,6 @@
-import pygame
-import os
+import pygame, os
 from constants import *
 
-# load images of pieces into two list
-dir = "assets/piece_set/california"
-wP = pygame.image.load(os.path.join(dir, "wP.png"))
-wR = pygame.image.load(os.path.join(dir, "wR.png"))
-wN = pygame.image.load(os.path.join(dir, "wN.png"))
-wB = pygame.image.load(os.path.join(dir, "wB.png"))
-wQ = pygame.image.load(os.path.join(dir, "wQ.png"))
-wK = pygame.image.load(os.path.join(dir, "wK.png"))
-bP = pygame.image.load(os.path.join(dir, "bP.png"))
-bR = pygame.image.load(os.path.join(dir, "bR.png"))
-bN = pygame.image.load(os.path.join(dir, "bN.png"))
-bB = pygame.image.load(os.path.join(dir, "bB.png"))
-bQ = pygame.image.load(os.path.join(dir, "bQ.png"))
-bK = pygame.image.load(os.path.join(dir, "bK.png"))
-
-white = [wP, wR, wN, wB, wQ, wK]
-black = [bP, bR, bN, bB, bQ, bK]
-
-# resize images
-for i in range(6):
-    white[i] = pygame.transform.scale(white[i], (SQUARE_SIZE, SQUARE_SIZE))
-    black[i] = pygame.transform.scale(black[i], (SQUARE_SIZE, SQUARE_SIZE))
 
 
 class Piece:
@@ -38,7 +15,7 @@ class Piece:
     
     def draw(self, screen, position):
         # assign the image
-        draw_this = white[self.img] if self.color == WHITE else black[self.img]
+        draw_this = WHITE_IMAGE[self.img] if self.color == WHITE else BLACK_IMAGE[self.img]
         y, x = position[0]*SQUARE_SIZE, position[1]*SQUARE_SIZE
         screen.blit(draw_this, (x, y))
     
@@ -49,6 +26,7 @@ class Piece:
     @staticmethod
     def est_legale(y, x):
         return 0 <= y < 8 and 0 <= x < 8
+
 
 class Pawn(Piece):
     img = 0
@@ -61,7 +39,7 @@ class Pawn(Piece):
         self.first_move = True
     
 
-    def valid_moves(self, board, position):
+    def update_moves(self, board, position):
         y, x = position[0], position[1]
 
         self.move_set = set()
@@ -93,7 +71,7 @@ class Rook(Piece):
         self.first_move = True
 
     
-    def valid_moves(self, board, position):
+    def update_moves(self, board, position):
         y, x = position[0], position[1]
         
         self.move_set = set()
@@ -146,11 +124,12 @@ class Rook(Piece):
                         self.move_set.add((y, j))
                     break
 
+
 class Knight(Piece):
     img = 2
 
     
-    def valid_moves(self, board, position):
+    def update_moves(self, board, position):
         y, x = position[0], position[1]
         
         self.move_set = set()
@@ -161,11 +140,12 @@ class Knight(Piece):
                 if abs(i) != abs(j) and Piece.est_legale(y+i, x+j) and (board.matrix[y+i][x+j] == 0 or board.matrix[y+i][x+j].color != self.color):
                     self.move_set.add((y+i, x+j))
 
+
 class Bishop(Piece):
     img = 3
     
     
-    def valid_moves(self, board, position):
+    def update_moves(self, board, position):
         y, x = position[0], position[1]
 
         self.move_set = set()
@@ -187,11 +167,12 @@ class Bishop(Piece):
                             self.move_set.add((a, b))
                         break
 
+
 class Queen(Piece):
     img = 4
     
     
-    def valid_moves(self, board, position):
+    def update_moves(self, board, position):
         y, x = position[0], position[1]
 
         self.move_set = set()
@@ -261,6 +242,7 @@ class Queen(Piece):
                         self.move_set.add((y, j))
                     break
 
+
 class King(Piece):
     img = 5
     
@@ -272,7 +254,7 @@ class King(Piece):
         self.first_move = True
 
     
-    def valid_moves(self, board, position):
+    def update_moves(self, board, position):
         y, x = position[0], position[1]
 
         self.move_set = set()
@@ -280,6 +262,4 @@ class King(Piece):
         for i in range(-1, 2):
             for j in range(-1, 2):
                 if (i != 0 or j != 0) and Piece.est_legale(y+i, x+j) and (board.matrix[y+i][x+j] == 0 or board.matrix[y+i][x+j].color != self.color):
-                    # TODO controllare se puoi mettere not in
-                    if (y+i, x+j) not in board.attacked:
-                        self.move_set.add((y+i, x+j))
+                    self.move_set.add((y+i, x+j))

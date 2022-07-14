@@ -1,5 +1,4 @@
-import pygame
-import os
+import pygame, os
 from piece import Piece, Pawn, Rook, Knight, Bishop, Queen, King
 from constants import *
 
@@ -12,9 +11,12 @@ class Board:
         self.matrix = [[0 for _ in range(self.columns)] for _ in range(self.rows)]
 
         # place the pieces on the board
+        
+        # pawn
         for i in range(8):
             self.matrix[1][i] = Pawn(BLACK)
             self.matrix[6][i] = Pawn(WHITE)
+        # black piece
         self.matrix[0][0] = Rook(BLACK)
         self.matrix[0][1] = Knight(BLACK)
         self.matrix[0][2] = Bishop(BLACK)
@@ -23,6 +25,7 @@ class Board:
         self.matrix[0][5] = Bishop(BLACK)
         self.matrix[0][6] = Knight(BLACK)
         self.matrix[0][7] = Rook(BLACK)
+        # white piece
         self.matrix[7][0] = Rook(WHITE)
         self.matrix[7][1] = Knight(WHITE)
         self.matrix[7][2] = Bishop(WHITE)
@@ -36,14 +39,15 @@ class Board:
         self.turn = WHITE
 
         # position of the selected piece
-        self.selected_pos = NULL_POSITION
+        self.selected_position = NULL_POSITION
 
         self.last_move = NULL_POSITION
 
-        #TODO scrivere meglio
-        # set with all the position that are attacked from the opposite color of self.turn
-        self.attacked = set()
-    
+        # calculate all the possible moves of each piece
+        self.update_moves()
+
+        self.checkmate = False
+
 
     '''
     draw all the pieces on the screen
@@ -52,32 +56,24 @@ class Board:
 
         # highlight last move
         if self.last_move != NULL_POSITION:
-            img = pygame.image.load(os.path.join("assets", "yellow_square.png"))
-            img = pygame.transform.scale(img, (SQUARE_SIZE, SQUARE_SIZE))
-            screen.blit(img, (self.last_move[0][1]*SQUARE_SIZE, self.last_move[0][0]*SQUARE_SIZE))
-            screen.blit(img, (self.last_move[1][1]*SQUARE_SIZE, self.last_move[1][0]*SQUARE_SIZE))
+            screen.blit(YELLOW_SQUARE, (self.last_move[0][1]*SQUARE_SIZE, self.last_move[0][0]*SQUARE_SIZE))
+            screen.blit(YELLOW_SQUARE, (self.last_move[1][1]*SQUARE_SIZE, self.last_move[1][0]*SQUARE_SIZE))
         
         # if a piece is selected show the possible moves
-        if self.selected_pos != NULL_POSITION:
-            y, x = self.selected_pos[0], self.selected_pos[1]
+        if self.selected_position != NULL_POSITION:
+            y, x = self.selected_position[0], self.selected_position[1]
             selected_piece = self.matrix[y][x]
 
             for possible_move in selected_piece.move_set:
                 # use a negative circle for the capture
                 if self.matrix[possible_move[0]][possible_move[1]]:
-                    img = pygame.image.load(os.path.join("assets", "green_circle_neg.png"))
-                    img = pygame.transform.scale(img, (SQUARE_SIZE, SQUARE_SIZE))
-                    screen.blit(img, (possible_move[1]*SQUARE_SIZE, possible_move[0]*SQUARE_SIZE))
+                    screen.blit(GREEN_CIRCLE_NEG, (possible_move[1]*SQUARE_SIZE, possible_move[0]*SQUARE_SIZE))
 
                 # use a circle for the movement on an empty square
                 else:
-                    pygame.draw.circle(screen, GREEN, (possible_move[1]*SQUARE_SIZE + SQUARE_SIZE/2, possible_move[0]*SQUARE_SIZE + SQUARE_SIZE/2), 15)
-                    # TODO forse posso aggiungere delle impostazioni che mi permettono di far selezionare il colore
-                    # img = pygame.image.load(os.path.join("assets", "green_circle.png"))
-                    # img = pygame.transform.scale(img, (SQUARE_SIZE, SQUARE_SIZE))
-                    # screen.blit(img, (possible_move[1]*SQUARE_SIZE, possible_move[0]*SQUARE_SIZE))
+                    screen.blit(GREEN_CIRCLE, (possible_move[1]*SQUARE_SIZE, possible_move[0]*SQUARE_SIZE))
 
-        
+        # draw the piece
         for y in range(self.rows):
             for x in range(self.columns):
                 tmp = self.matrix[y][x]
@@ -85,56 +81,92 @@ class Board:
                 if tmp:
                     tmp.draw(screen, position)
 
+        # highlight the king if it's in check 
+        if Board.in_check(self.matrix, self.turn):
+            for y in range(8):
+                for x in range(8):
+                    if self.matrix[y][x] != 0 and self.matrix[y][x].color == self.turn and type(self.matrix[y][x]) == King:
+                        screen.blit(RED_CIRCLE_NEG, (x*SQUARE_SIZE, y*SQUARE_SIZE))
+
 
     '''
     update the possible moves of each piece on the board
     '''
     def update_moves(self):
 
-        self.attacked_position()
+        self.checkmate = True
+
         for y in range(self.rows):
             for x in range(self.columns):
-                tmp = self.matrix[y][x]
-                position = (y, x)
-                if tmp:
-                    tmp.valid_moves(self, position)
+                piece = self.matrix[y][x]
+                if piece != 0 and piece.color == self.turn:
+                    piece.update_moves(self, (y, x))
+                    
+                    # removes illegal moves that would put the king in check
+                    removed_moves = set()
+                    for move in piece.move_set:
+                        tmp_matrix = [row[:] for row in self.matrix]
+                        tmp_matrix[move[0]][move[1]] = tmp_matrix[y][x]
+                        tmp_matrix[y][x] = 0
+                        if Board.in_check(tmp_matrix, self.turn):
+                            removed_moves.add(move)
+                    
+                    for move in removed_moves:
+                        piece.move_set.remove(move)
+
+                    if len(piece.move_set) > 0:
+                        self.checkmate = False
 
 
     '''
-    add all the position attacked from the player with color opposite of the player that can move
+    check if the king in the matrix is attacked
     '''
-    def attacked_position(self):
+    @staticmethod
+    def in_check(matrix, color):
+        att = Board.attacked_positions(matrix, color)
+        
+        king_position = NULL_POSITION
+        for y in range(8):
+            for x in range(8):
+                if matrix[y][x] != 0 and matrix[y][x].color == color and type(matrix[y][x]) == King:
+                    king_position = (y, x)
 
-        color = self.turn
+        return king_position in att
 
-        # reset attacked
-        self.attacked = set()
+
+    '''
+    calculate all the square attacked from a player in matrix
+    '''
+    @staticmethod
+    def attacked_positions(matrix, color):
+
+        attacked = set()
 
         for y in range(8):
             for x in range(8):
-                if self.matrix[y][x] != 0 and color != self.matrix[y][x].color:
+                if matrix[y][x] != 0 and color != matrix[y][x].color:
 
-                    if type(self.matrix[y][x]) == Pawn:
+                    if type(matrix[y][x]) == Pawn:
 
-                        sign = -1 if self.matrix[y][x].color == WHITE else 1
+                        sign = -1 if matrix[y][x].color == WHITE else 1
 
                         if Piece.est_legale(y+sign, x+1):
-                            self.attacked.add((y+sign, x+1))
+                            attacked.add((y+sign, x+1))
                         if Piece.est_legale(y+sign, x-1):
-                            self.attacked.add((y+sign, x-1))
+                            attacked.add((y+sign, x-1))
 
 
-                    elif type(self.matrix[y][x]) == Rook:
+                    elif type(matrix[y][x]) == Rook:
 
                         # vertical up moves
                         for i in range(y+1, 8):
                             if Piece.est_legale(i, x) == False:
                                 break
                             else:
-                                if self.matrix[i][x] == 0:
-                                    self.attacked.add((i, x))
+                                if matrix[i][x] == 0:
+                                    attacked.add((i, x))
                                 else:
-                                    self.attacked.add((i, x))
+                                    attacked.add((i, x))
                                     break
 
                         # vertical down moves
@@ -142,21 +174,21 @@ class Board:
                             if Piece.est_legale(i, x) == False:
                                 break
                             else:
-                                if self.matrix[i][x] == 0:
-                                    self.attacked.add((i, x))
+                                if matrix[i][x] == 0:
+                                    attacked.add((i, x))
                                 else:
-                                    self.attacked.add((i, x))
+                                    attacked.add((i, x))
                                     break
-                        # TODO while for
+
                         # horizontal right moves
                         for j in range(x+1, 8):
                             if Piece.est_legale(y, j) == False:
                                 break
                             else:
-                                if self.matrix[y][j] == 0:
-                                    self.attacked.add((y, j))
+                                if matrix[y][j] == 0:
+                                    attacked.add((y, j))
                                 else:
-                                    self.attacked.add((y, j))
+                                    attacked.add((y, j))
                                     break
 
                         # horizontal left moves
@@ -164,28 +196,27 @@ class Board:
                             if Piece.est_legale(y, j) == False:
                                 break
                             else:
-                                if self.matrix[y][j] == 0:
-                                    self.attacked.add((y, j))
+                                if matrix[y][j] == 0:
+                                    attacked.add((y, j))
                                 else:
-                                    self.attacked.add((y, j))
+                                    attacked.add((y, j))
                                     break
 
 
-                    elif type(self.matrix[y][x]) == Knight:
+                    elif type(matrix[y][x]) == Knight:
 
                         jump = [-2, -1, 1, 2]
                         for i in jump:
                             for j in jump:
                                 if abs(i) != abs(j) and Piece.est_legale(y+i, x+j):
-                                    self.attacked.add((y+i, x+j))
+                                    attacked.add((y+i, x+j))
 
 
-                    elif type(self.matrix[y][x]) == Bishop:
+                    elif type(matrix[y][x]) == Bishop:
                         
                         # all the combination of the direction 
                         signs = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
                         
-                        # TODO forse pure qui posso sostituire con un while
                         for (sign_y, sign_x) in signs:
                             for k in range(1, 8):
                                 a = y+k*sign_y
@@ -193,19 +224,18 @@ class Board:
                                 if Piece.est_legale(a, b) == False:
                                     break
                                 else:
-                                    if self.matrix[a][b] == 0:
-                                        self.attacked.add((a, b))
+                                    if matrix[a][b] == 0:
+                                        attacked.add((a, b))
                                     else:
-                                        self.attacked.add((a, b))
+                                        attacked.add((a, b))
                                         break
 
 
-                    elif type(self.matrix[y][x]) == Queen:
+                    elif type(matrix[y][x]) == Queen:
 
                         # all the combination of the direction for the diagonal moves
                         signs = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
                         
-                        # TODO forse pure qui posso sostituire con un while
                         for (sign_y, sign_x) in signs:
                             for k in range(1, 8):
                                 a = y+k*sign_y
@@ -213,10 +243,10 @@ class Board:
                                 if Piece.est_legale(a, b) == False:
                                     break
                                 else:
-                                    if self.matrix[a][b] == 0:
-                                        self.attacked.add((a, b))
+                                    if matrix[a][b] == 0:
+                                        attacked.add((a, b))
                                     else:
-                                        self.attacked.add((a, b))
+                                        attacked.add((a, b))
                                         break
                         
                         # vertical up moves
@@ -224,10 +254,10 @@ class Board:
                             if Piece.est_legale(i, x) == False:
                                 break
                             else:
-                                if self.matrix[i][x] == 0:
-                                    self.attacked.add((i, x))
+                                if matrix[i][x] == 0:
+                                    attacked.add((i, x))
                                 else:
-                                    self.attacked.add((i, x))
+                                    attacked.add((i, x))
                                     break
 
                         # vertical down moves
@@ -235,10 +265,10 @@ class Board:
                             if Piece.est_legale(i, x) == False:
                                 break
                             else:
-                                if self.matrix[i][x] == 0:
-                                    self.attacked.add((i, x))
+                                if matrix[i][x] == 0:
+                                    attacked.add((i, x))
                                 else:
-                                    self.attacked.add((i, x))
+                                    attacked.add((i, x))
                                     break
 
                         # horizontal right moves
@@ -246,10 +276,10 @@ class Board:
                             if Piece.est_legale(y, j) == False:
                                 break
                             else:
-                                if self.matrix[y][j] == 0:
-                                    self.attacked.add((y, j))
+                                if matrix[y][j] == 0:
+                                    attacked.add((y, j))
                                 else:
-                                    self.attacked.add((y, j))
+                                    attacked.add((y, j))
                                     break
 
                         # horizontal left moves
@@ -257,17 +287,19 @@ class Board:
                             if Piece.est_legale(y, j) == False:
                                 break
                             else:
-                                if self.matrix[y][j] == 0:
-                                    self.attacked.add((y, j))
+                                if matrix[y][j] == 0:
+                                    attacked.add((y, j))
                                 else:
-                                    self.attacked.add((y, j))
+                                    attacked.add((y, j))
                                     break
 
-                    elif type(self.matrix[y][x]) == King:
+                    elif type(matrix[y][x]) == King:
                         for i in range(-1, 2):
                             for j in range(-1, 2):
                                 if (i != 0 or j != 0) and Piece.est_legale(y+i, x+j):
-                                    self.attacked.add((y+i, x+j))
+                                    attacked.add((y+i, x+j))
+        
+        return attacked
 
 
     '''
@@ -277,12 +309,14 @@ class Board:
         y, x = position[1]//SQUARE_SIZE, position[0]//SQUARE_SIZE
         
         if self.matrix[y][x] != 0 and self.matrix[y][x].color == self.turn:
-            self.selected_pos = (y, x)
+            self.selected_position = (y, x)
         else:
-            if self.selected_pos != NULL_POSITION and (y, x) in self.matrix[self.selected_pos[0]][self.selected_pos[1]].move_set:
+            if self.selected_position != NULL_POSITION and (y, x) in self.matrix[self.selected_position[0]][self.selected_position[1]].move_set:
+                
+                # self.animate_move(screen, piece, (y, x))
                 self.move((y, x))
             else:
-                self.selected_pos = NULL_POSITION
+                self.selected_position = NULL_POSITION
 
 
     '''
@@ -294,25 +328,43 @@ class Board:
 
     def move(self, end):
         self.change_turn()
-        self.last_move = ((self.selected_pos[0], self.selected_pos[1]), (end[0], end[1]))
         
-        piece = self.matrix[self.selected_pos[0]][self.selected_pos[1]]
+        piece = self.matrix[self.selected_position[0]][self.selected_position[1]]
+
+        # update last move
+        self.last_move = ((self.selected_position[0], self.selected_position[1]), (end[0], end[1]))
 
         if type(piece) in {King, Pawn, Rook}:
             piece.first_move = False
-        
+
         # pawn promotion
         if type(piece) == Pawn and ( (end[0] == 0 and piece.color == WHITE) or (end[0] == 7 and piece.color == BLACK) ):
             piece = Queen(piece.color)
 
         self.matrix[end[0]][end[1]] = piece
-        self.matrix[self.selected_pos[0]][self.selected_pos[1]] = 0
-
-        
+        self.matrix[self.selected_position[0]][self.selected_position[1]] = 0
 
         self.update_moves()
 
-        self.selected_pos = NULL_POSITION
-        # nel caso mi serva sapere il pezzo che ho rimosso
-        # removed = self.board[end[0]][end[1]]
-        # return removed
+        # reset selected position
+        self.selected_position = NULL_POSITION
+
+
+
+# -----------------------------------
+    def animate_move(self, screen, piece, end):
+        start = self.selected_position
+        
+        y_distance = end[0] - start[0]
+        x_distance = end[1] - start[1]
+        frames_per_square = 10
+        frame_count = (abs(y_distance) + abs(x_distance)) * frames_per_square
+        
+        for frame in range(frame_count + 1):
+            y, x = start[0] + y_distance*frame/frame_count, start[1] + x_distance*frame/frame_count
+            
+            screen.blit(BACKGROUND, (0, 0))
+            self.draw(screen)
+            piece.draw(screen, (y, x))
+
+            pygame.display.update()

@@ -1,5 +1,4 @@
 import pygame
-import os
 from constants import *
 from board import Board
 
@@ -10,15 +9,12 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Chess")
 
-# load chessboard
-dir = "assets/board_set"
-background = pygame.transform.scale(pygame.image.load(os.path.join(dir, "grey.jpg")), (WIDTH, HEIGHT))
-
 # necessary for capping the FPS
 clock = pygame.time.Clock()
 
+
 def update_display(board):
-    screen.blit(background, (0, 0))
+    screen.blit(BACKGROUND, (0, 0))
     board.draw(screen)
     pygame.display.update()
 
@@ -31,8 +27,6 @@ def main():
 
     # create instance of board class from board.py
     board = Board()
-    # calculate all the possible moves of each piece
-    board.update_moves()
     
     while run:
         clock.tick(FPS)
@@ -49,7 +43,9 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 position = pygame.mouse.get_pos()
                 board.click(position)
-    
+
+        if board.checkmate:
+            run = False
 
     # stop pygame
     pygame.quit()
