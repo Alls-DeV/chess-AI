@@ -28,8 +28,8 @@ class Board:
         # white piece
         self.matrix[7][0] = Rook(WHITE)
         self.matrix[7][1] = Knight(WHITE)
-        self.matrix[7][2] = Bishop(WHITE)
-        self.matrix[7][3] = Queen(WHITE)
+        # self.matrix[7][2] = Bishop(WHITE)
+        # self.matrix[7][3] = Queen(WHITE)
         self.matrix[7][4] = King(WHITE)
         self.matrix[7][5] = Bishop(WHITE)
         self.matrix[7][6] = Knight(WHITE)
@@ -114,6 +114,39 @@ class Board:
                     for move in removed_moves:
                         piece.move_set.remove(move)
 
+                    # castle
+                    if type(piece) == King and piece.first_move:
+                        # if king is in check can't castle
+                        if Board.in_check(self.matrix, self.turn):
+                            if (y, 5) in piece.move_set:
+                                piece.move_set.remove((y, 5))
+                            if (y, 6) in piece.move_set:
+                                piece.move_set.remove((y, 6))
+                            if (y, 2) in piece.move_set:
+                                piece.move_set.remove((y, 2))
+                            if (y, 3) in piece.move_set:
+                                piece.move_set.remove((y, 3))
+
+                        else:
+                            # short-castle
+                            if (y, 5) in piece.move_set and (y, 6) in piece.move_set:
+                                piece.move_set.remove((y, 5))
+                            else:
+                                if (y, 5) in piece.move_set:
+                                    piece.move_set.remove((y, 5))
+                                if (y, 6) in piece.move_set:
+                                    piece.move_set.remove((y, 6))
+
+                            # long-castle
+                            if (y, 2) in piece.move_set and (y, 3) in piece.move_set:
+                                piece.move_set.remove((y, 3))
+                            else:
+                                if (y, 2) in piece.move_set:
+                                    piece.move_set.remove((y, 2))
+                                if (y, 3) in piece.move_set:
+                                    piece.move_set.remove((y, 3))
+
+                    # if there aren't possible moves, it is checkmate
                     if len(piece.move_set) > 0:
                         self.checkmate = False
 
@@ -330,11 +363,9 @@ class Board:
     move and capture
     '''
     def move(self, end, screen):
+        # TODO rimuovere piece non e' necessario passarlo
         start = self.selected_position
         piece = self.matrix[start[0]][start[1]]
-        
-        # remove the piece from the starting position
-        self.matrix[start[0]][start[1]] = 0
         
         # reset selected position
         self.selected_position = NULL_POSITION
@@ -342,14 +373,13 @@ class Board:
         # update first move
         if type(piece) in {King, Pawn, Rook}:
             piece.first_move = False
+        
+        # castle
+        if type(piece) == King and abs(start[1] - end[1]) == 2:
+            self.castle(start, end, screen)
 
-        self.animate_move(start, end, screen, piece)
-
-        # pawn promotion
-        if type(piece) == Pawn and ( (end[0] == 0 and piece.color == WHITE) or (end[0] == 7 and piece.color == BLACK) ):
-            piece = Queen(piece.color)
-
-        self.matrix[end[0]][end[1]] = piece
+        else:
+            self.animate_move(start, end, screen, piece)
 
         # update last move
         self.last_move = ((start[0], start[1]), (end[0], end[1]))
@@ -357,15 +387,52 @@ class Board:
         self.update_moves()
 
 
+    def castle(self, start_king, end_king, screen):
+        start_rook = 0 if start_king[1] > end_king[1] else 7
+        
+        king = self.matrix[start_king[0]][start_king[1]]
+        rook = self.matrix[start_king[0]][start_rook]
+        
+        # remove king and rook from the starting position
+        self.matrix[start_king[0]][start_king[1]] = 0
+        self.matrix[start_king[0]][start_rook] = 0
+
+        # animation for castle
+
+        end_rook = 3 if start_king[1] > end_king[1] else 5
+        king_distance = end_king[1] - start_king[1]
+        rook_distance = end_rook - start_rook
+        frame_count = 20
+
+        for frame in range(frame_count + 1):
+            x_king = start_king[1] + king_distance*frame/frame_count
+            x_rook = start_rook + rook_distance*frame/frame_count
+
+            screen.blit(BACKGROUND, (0, 0))
+            self.draw(screen)
+            king.draw(screen, (start_king[0], x_king))
+            rook.draw(screen, (start_king[0], x_rook))
+
+            pygame.display.update()
+        
+        # set piece in the end position
+        self.matrix[end_king[0]][end_king[1]] = king
+        self.matrix[end_king[0]][end_rook] = rook
+
     '''
     animation for the movement of the piece
     '''
     def animate_move(self, start, end, screen, piece):
+        # remove the piece from the starting position
+        self.matrix[start[0]][start[1]] = 0
+            
         y_distance = end[0] - start[0]
         x_distance = end[1] - start[1]
         frames_per_square = 10
-        frame_count = (abs(y_distance) + abs(x_distance)) * frames_per_square
-        
+
+        # max frame count possible is 50 otherwise the piece is too slow       
+        frame_count = min( 50, (abs(y_distance) + abs(x_distance)) * frames_per_square)
+
         for frame in range(frame_count + 1):
             y, x = start[0] + y_distance*frame/frame_count, start[1] + x_distance*frame/frame_count
             
@@ -374,3 +441,9 @@ class Board:
             piece.draw(screen, (y, x))
 
             pygame.display.update()
+        
+        # pawn promotion
+        if type(piece) == Pawn and ( (end[0] == 0 and piece.color == WHITE) or (end[0] == 7 and piece.color == BLACK) ):
+            piece = Queen(piece.color)
+
+        self.matrix[end[0]][end[1]] = piece

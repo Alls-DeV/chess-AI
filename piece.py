@@ -262,3 +262,16 @@ class King(Piece):
             for j in range(-1, 2):
                 if (i != 0 or j != 0) and Piece.est_legale(y+i, x+j) and (board.matrix[y+i][x+j] == 0 or board.matrix[y+i][x+j].color != self.color):
                     self.move_set.add((y+i, x+j))
+        
+        if self.first_move == True:
+            # short-castle
+            if type(board.matrix[y][7]) == Rook and board.matrix[y][7].first_move:
+                if board.matrix[y][6] == 0 and board.matrix[y][5] == 0:
+                    self.move_set.add((y, 5))
+                    self.move_set.add((y, 6))
+
+            # long-castle
+            if type(board.matrix[y][0]) == Rook and board.matrix[y][0].first_move:
+                if board.matrix[y][1] == 0 and board.matrix[y][2] == 0 and board.matrix[y][3] == 0:
+                    self.move_set.add((y, 2))
+                    self.move_set.add((y, 3))
