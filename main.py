@@ -13,7 +13,7 @@ pygame.display.set_caption("Chess")
 clock = pygame.time.Clock()
 
 
-def update_display(board):
+def update_display(board : Board):
     screen.blit(BACKGROUND, (0, 0))
     board.draw(screen)
     pygame.display.update()

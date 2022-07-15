@@ -1,4 +1,5 @@
 import pygame, os
+from typing import Union
 from piece import Piece, Pawn, Rook, Knight, Bishop, Queen, King
 from constants import *
 
@@ -16,7 +17,7 @@ class Board:
         for i in range(8):
             self.matrix[1][i] = Pawn(BLACK)
             self.matrix[6][i] = Pawn(WHITE)
-        # black piece
+        # black pieces
         self.matrix[0][0] = Rook(BLACK)
         self.matrix[0][1] = Knight(BLACK)
         self.matrix[0][2] = Bishop(BLACK)
@@ -25,11 +26,11 @@ class Board:
         self.matrix[0][5] = Bishop(BLACK)
         self.matrix[0][6] = Knight(BLACK)
         self.matrix[0][7] = Rook(BLACK)
-        # white piece
+        # white pieces
         self.matrix[7][0] = Rook(WHITE)
         self.matrix[7][1] = Knight(WHITE)
-        # self.matrix[7][2] = Bishop(WHITE)
-        # self.matrix[7][3] = Queen(WHITE)
+        self.matrix[7][2] = Bishop(WHITE)
+        self.matrix[7][3] = Queen(WHITE)
         self.matrix[7][4] = King(WHITE)
         self.matrix[7][5] = Bishop(WHITE)
         self.matrix[7][6] = Knight(WHITE)
@@ -48,11 +49,10 @@ class Board:
 
         self.checkmate = False
 
-
     '''
     draw all the pieces on the screen
     '''
-    def draw(self, screen):
+    def draw(self, screen : pygame.Surface):
 
         # highlight last move
         if self.last_move != NULL_POSITION:
@@ -88,7 +88,6 @@ class Board:
                     if self.matrix[y][x] != 0 and self.matrix[y][x].color == self.turn and type(self.matrix[y][x]) == King:
                         screen.blit(RED_CIRCLE_NEG, (x*SQUARE_SIZE, y*SQUARE_SIZE))
 
-
     '''
     update the possible moves of each piece on the board
     '''
@@ -100,7 +99,7 @@ class Board:
             for x in range(self.columns):
                 piece = self.matrix[y][x]
                 if piece != 0 and piece.color == self.turn:
-                    piece.update_moves(self, (y, x))
+                    piece.update_moves(self.matrix, (y, x))
                     
                     # removes illegal moves that would put the king in check
                     removed_moves = set()
@@ -150,12 +149,11 @@ class Board:
                     if len(piece.move_set) > 0:
                         self.checkmate = False
 
-
     '''
     check if the king in the matrix is attacked
     '''
     @staticmethod
-    def in_check(matrix, color):
+    def in_check(matrix, color : str):
         att = Board.attacked_positions(matrix, color)
         
         king_position = NULL_POSITION
@@ -166,12 +164,11 @@ class Board:
 
         return king_position in att
 
-
     '''
     calculate all the square attacked from a player in matrix
     '''
     @staticmethod
-    def attacked_positions(matrix, color):
+    def attacked_positions(matrix : list[list[Union[Piece, int]]], color : str):
 
         attacked = set()
 
@@ -187,7 +184,6 @@ class Board:
                             attacked.add((y+sign, x+1))
                         if Piece.est_legale(y+sign, x-1):
                             attacked.add((y+sign, x-1))
-
 
                     elif type(matrix[y][x]) == Rook:
 
@@ -235,7 +231,6 @@ class Board:
                                     attacked.add((y, j))
                                     break
 
-
                     elif type(matrix[y][x]) == Knight:
 
                         jump = [-2, -1, 1, 2]
@@ -243,7 +238,6 @@ class Board:
                             for j in jump:
                                 if abs(i) != abs(j) and Piece.est_legale(y+i, x+j):
                                     attacked.add((y+i, x+j))
-
 
                     elif type(matrix[y][x]) == Bishop:
                         
@@ -262,7 +256,6 @@ class Board:
                                     else:
                                         attacked.add((a, b))
                                         break
-
 
                     elif type(matrix[y][x]) == Queen:
 
@@ -334,11 +327,10 @@ class Board:
         
         return attacked
 
-
     '''
     manage the interaction with the mouse button, like selecting or move piece
     '''
-    def click(self, position, screen):
+    def click(self, position : tuple[int, int], screen : pygame.Surface):
         y, x = position[1]//SQUARE_SIZE, position[0]//SQUARE_SIZE
         
         if self.matrix[y][x] != 0 and self.matrix[y][x].color == self.turn:
@@ -351,18 +343,16 @@ class Board:
             else:
                 self.selected_position = NULL_POSITION
 
-
     '''
     swap the color of the turn
     '''
     def change_turn(self):
         self.turn = WHITE if self.turn == BLACK else BLACK
 
-
     '''
     move and capture
     '''
-    def move(self, end, screen):
+    def move(self, end : tuple[int, int], screen : pygame.Surface):
         # TODO rimuovere piece non e' necessario passarlo
         start = self.selected_position
         piece = self.matrix[start[0]][start[1]]
@@ -386,8 +376,7 @@ class Board:
         self.change_turn()
         self.update_moves()
 
-
-    def castle(self, start_king, end_king, screen):
+    def castle(self, start_king : tuple[int, int], end_king : tuple[int, int], screen : pygame.Surface):
         start_rook = 0 if start_king[1] > end_king[1] else 7
         
         king = self.matrix[start_king[0]][start_king[1]]
@@ -422,7 +411,7 @@ class Board:
     '''
     animation for the movement of the piece
     '''
-    def animate_move(self, start, end, screen, piece):
+    def animate_move(self, start : tuple[int, int], end : tuple[int, int], screen : pygame.Surface, piece : Piece):
         # remove the piece from the starting position
         self.matrix[start[0]][start[1]] = 0
             

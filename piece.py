@@ -1,29 +1,32 @@
 import pygame, os
+from abc import ABC, abstractmethod
+from typing import Union
 from constants import *
 
 
-class Piece:
+class Piece(ABC):
     # represent the index of the image in the list white/black
     img = -1
-
     
-    def __init__(self, color):
+    def __init__(self, color : str):
         self.color = color
         self.move_set = set()
 
-    
-    def draw(self, screen, position):
+    @abstractmethod
+    def update_moves(self, board, position):
+        pass
+
+    def draw(self, screen : pygame.Surface, position : tuple[int, int]):
         # assign the image
         draw_this = WHITE_IMAGE[self.img] if self.color == WHITE else BLACK_IMAGE[self.img]
         y, x = position[0]*SQUARE_SIZE, position[1]*SQUARE_SIZE
         screen.blit(draw_this, (x, y))
     
-
     '''
     check the validity of a move
     '''
     @staticmethod
-    def est_legale(y, x):
+    def est_legale(y : int, x : int):
         return 0 <= y < 8 and 0 <= x < 8
 
 
@@ -31,14 +34,13 @@ class Pawn(Piece):
     img = 0
 
     
-    def __init__(self, color):
+    def __init__(self, color : str):
         super().__init__(color)
 
         # check if the pawn has moved
         self.first_move = True
-    
 
-    def update_moves(self, board, position):
+    def update_moves(self, board : list[list[Union[Piece,int]]], position : tuple[int, int]):
         y, x = position[0], position[1]
 
         self.move_set = set()
@@ -47,30 +49,28 @@ class Pawn(Piece):
         sign = -1 if self.color == WHITE else 1
         
         # check for the movement
-        if Piece.est_legale(y+sign, x) and board.matrix[y+sign][x] == 0:
+        if Piece.est_legale(y+sign, x) and board[y+sign][x] == 0:
             self.move_set.add((y+sign, x))
-            if self.first_move and board.matrix[y + 2*sign][x] == 0:
+            if self.first_move and board[y + 2*sign][x] == 0:
                 self.move_set.add((y + 2*sign, x))
         
         # check for the capture
-        if Piece.est_legale(y+sign, x+1) and board.matrix[y+sign][x+1] != 0 and board.matrix[y+sign][x+1].color != board.matrix[y][x].color:
+        if Piece.est_legale(y+sign, x+1) and board[y+sign][x+1] != 0 and board[y+sign][x+1].color != board[y][x].color:
             self.move_set.add((y+sign, x+1))
-        if Piece.est_legale(y+sign, x-1) and board.matrix[y+sign][x-1] != 0 and board.matrix[y+sign][x-1].color != board.matrix[y][x].color:
+        if Piece.est_legale(y+sign, x-1) and board[y+sign][x-1] != 0 and board[y+sign][x-1].color != board[y][x].color:
             self.move_set.add((y+sign, x-1))
 
 
 class Rook(Piece):
     img = 1
 
-    
-    def __init__(self, color):
+    def __init__(self, color : str):
         super().__init__(color)
 
         # flag for check if this rook can castle
         self.first_move = True
-
     
-    def update_moves(self, board, position):
+    def update_moves(self, board : list[list[Union[Piece,int]]], position : tuple[int, int]):
         y, x = position[0], position[1]
         
         self.move_set = set()
@@ -80,10 +80,10 @@ class Rook(Piece):
             if Piece.est_legale(i, x) == False:
                 break
             else:
-                if board.matrix[i][x] == 0:
+                if board[i][x] == 0:
                     self.move_set.add((i, x))
                 else:
-                    if board.matrix[i][x].color != board.matrix[y][x].color:
+                    if board[i][x].color != board[y][x].color:
                         self.move_set.add((i, x))
                     break
 
@@ -92,10 +92,10 @@ class Rook(Piece):
             if Piece.est_legale(i, x) == False:
                 break
             else:
-                if board.matrix[i][x] == 0:
+                if board[i][x] == 0:
                     self.move_set.add((i, x))
                 else:
-                    if board.matrix[i][x].color != board.matrix[y][x].color:
+                    if board[i][x].color != board[y][x].color:
                         self.move_set.add((i, x))
                     break
 
@@ -104,10 +104,10 @@ class Rook(Piece):
             if Piece.est_legale(y, j) == False:
                 break
             else:
-                if board.matrix[y][j] == 0:
+                if board[y][j] == 0:
                     self.move_set.add((y, j))
                 else:
-                    if board.matrix[y][j].color != board.matrix[y][x].color:
+                    if board[y][j].color != board[y][x].color:
                         self.move_set.add((y, j))
                     break
 
@@ -116,10 +116,10 @@ class Rook(Piece):
             if Piece.est_legale(y, j) == False:
                 break
             else:
-                if board.matrix[y][j] == 0:
+                if board[y][j] == 0:
                     self.move_set.add((y, j))
                 else:
-                    if board.matrix[y][j].color != board.matrix[y][x].color:
+                    if board[y][j].color != board[y][x].color:
                         self.move_set.add((y, j))
                     break
 
@@ -127,8 +127,7 @@ class Rook(Piece):
 class Knight(Piece):
     img = 2
 
-    
-    def update_moves(self, board, position):
+    def update_moves(self, board : list[list[Union[Piece,int]]], position : tuple[int, int]):
         y, x = position[0], position[1]
         
         self.move_set = set()
@@ -136,15 +135,14 @@ class Knight(Piece):
         jump = [-2, -1, 1, 2]
         for i in jump:
             for j in jump:
-                if abs(i) != abs(j) and Piece.est_legale(y+i, x+j) and (board.matrix[y+i][x+j] == 0 or board.matrix[y+i][x+j].color != self.color):
+                if abs(i) != abs(j) and Piece.est_legale(y+i, x+j) and (board[y+i][x+j] == 0 or board[y+i][x+j].color != self.color):
                     self.move_set.add((y+i, x+j))
 
 
 class Bishop(Piece):
     img = 3
     
-    
-    def update_moves(self, board, position):
+    def update_moves(self, board : list[list[Union[Piece,int]]], position : tuple[int, int]):
         y, x = position[0], position[1]
 
         self.move_set = set()
@@ -159,10 +157,10 @@ class Bishop(Piece):
                 if Piece.est_legale(a, b) == False:
                     break
                 else:
-                    if board.matrix[a][b] == 0:
+                    if board[a][b] == 0:
                         self.move_set.add((a, b))
                     else:
-                        if board.matrix[a][b].color != board.matrix[y][x].color:
+                        if board[a][b].color != board[y][x].color:
                             self.move_set.add((a, b))
                         break
 
@@ -170,8 +168,7 @@ class Bishop(Piece):
 class Queen(Piece):
     img = 4
     
-    
-    def update_moves(self, board, position):
+    def update_moves(self, board : list[list[Union[Piece,int]]], position : tuple[int, int]):
         y, x = position[0], position[1]
 
         self.move_set = set()
@@ -186,10 +183,10 @@ class Queen(Piece):
                 if Piece.est_legale(a, b) == False:
                     break
                 else:
-                    if board.matrix[a][b] == 0:
+                    if board[a][b] == 0:
                         self.move_set.add((a, b))
                     else:
-                        if board.matrix[a][b].color != board.matrix[y][x].color:
+                        if board[a][b].color != board[y][x].color:
                             self.move_set.add((a, b))
                         break
 
@@ -198,10 +195,10 @@ class Queen(Piece):
             if Piece.est_legale(i, x) == False:
                 break
             else:
-                if board.matrix[i][x] == 0:
+                if board[i][x] == 0:
                     self.move_set.add((i, x))
                 else:
-                    if board.matrix[i][x].color != board.matrix[y][x].color:
+                    if board[i][x].color != board[y][x].color:
                         self.move_set.add((i, x))
                     break
 
@@ -210,10 +207,10 @@ class Queen(Piece):
             if Piece.est_legale(i, x) == False:
                 break
             else:
-                if board.matrix[i][x] == 0:
+                if board[i][x] == 0:
                     self.move_set.add((i, x))
                 else:
-                    if board.matrix[i][x].color != board.matrix[y][x].color:
+                    if board[i][x].color != board[y][x].color:
                         self.move_set.add((i, x))
                     break
         
@@ -222,10 +219,10 @@ class Queen(Piece):
             if Piece.est_legale(y, j) == False:
                 break
             else:
-                if board.matrix[y][j] == 0:
+                if board[y][j] == 0:
                     self.move_set.add((y, j))
                 else:
-                    if board.matrix[y][j].color != board.matrix[y][x].color:
+                    if board[y][j].color != board[y][x].color:
                         self.move_set.add((y, j))
                     break
 
@@ -234,10 +231,10 @@ class Queen(Piece):
             if Piece.est_legale(y, j) == False:
                 break
             else:
-                if board.matrix[y][j] == 0:
+                if board[y][j] == 0:
                     self.move_set.add((y, j))
                 else:
-                    if board.matrix[y][j].color != board.matrix[y][x].color:
+                    if board[y][j].color != board[y][x].color:
                         self.move_set.add((y, j))
                     break
 
@@ -245,33 +242,31 @@ class Queen(Piece):
 class King(Piece):
     img = 5
     
-    
-    def __init__(self, color):
+    def __init__(self, color : str):
         super().__init__(color)
 
         # flag for check if king can castle
         self.first_move = True
-
     
-    def update_moves(self, board, position):
+    def update_moves(self, board : list[list[Union[Piece,int]]], position : tuple[int, int]):
         y, x = position[0], position[1]
 
         self.move_set = set()
 
         for i in range(-1, 2):
             for j in range(-1, 2):
-                if (i != 0 or j != 0) and Piece.est_legale(y+i, x+j) and (board.matrix[y+i][x+j] == 0 or board.matrix[y+i][x+j].color != self.color):
+                if (i != 0 or j != 0) and Piece.est_legale(y+i, x+j) and (board[y+i][x+j] == 0 or board[y+i][x+j].color != self.color):
                     self.move_set.add((y+i, x+j))
         
         if self.first_move == True:
             # short-castle
-            if type(board.matrix[y][7]) == Rook and board.matrix[y][7].first_move:
-                if board.matrix[y][6] == 0 and board.matrix[y][5] == 0:
+            if type(board[y][7]) == Rook and board[y][7].first_move:
+                if board[y][6] == 0 and board[y][5] == 0:
                     self.move_set.add((y, 5))
                     self.move_set.add((y, 6))
 
             # long-castle
-            if type(board.matrix[y][0]) == Rook and board.matrix[y][0].first_move:
-                if board.matrix[y][1] == 0 and board.matrix[y][2] == 0 and board.matrix[y][3] == 0:
+            if type(board[y][0]) == Rook and board[y][0].first_move:
+                if board[y][1] == 0 and board[y][2] == 0 and board[y][3] == 0:
                     self.move_set.add((y, 2))
                     self.move_set.add((y, 3))
