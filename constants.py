@@ -4,7 +4,7 @@ WIDTH = 960
 HEIGHT = 960
 SQUARE_SIZE = WIDTH//8
 
-FPS = 15
+FPS = 30
 
 WHITE = "w"
 BLACK = "b"

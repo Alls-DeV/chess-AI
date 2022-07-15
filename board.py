@@ -13,9 +13,9 @@ class Board:
         # place the pieces on the board
         
         # pawn
-        for i in range(8):
-            self.matrix[1][i] = Pawn(BLACK)
-            self.matrix[6][i] = Pawn(WHITE)
+        # for i in range(8):
+        #     self.matrix[1][i] = Pawn(BLACK)
+        #     self.matrix[6][i] = Pawn(WHITE)
         # black piece
         self.matrix[0][0] = Rook(BLACK)
         self.matrix[0][1] = Knight(BLACK)
@@ -305,7 +305,7 @@ class Board:
     '''
     manage the interaction with the mouse button, like selecting or move piece
     '''
-    def click(self, position):
+    def click(self, position, screen):
         y, x = position[1]//SQUARE_SIZE, position[0]//SQUARE_SIZE
         
         if self.matrix[y][x] != 0 and self.matrix[y][x].color == self.turn:
@@ -314,7 +314,7 @@ class Board:
             if self.selected_position != NULL_POSITION and (y, x) in self.matrix[self.selected_position[0]][self.selected_position[1]].move_set:
                 
                 # self.animate_move(screen, piece, (y, x))
-                self.move((y, x))
+                self.move((y, x), screen)
             else:
                 self.selected_position = NULL_POSITION
 
@@ -326,35 +326,41 @@ class Board:
         self.turn = WHITE if self.turn == BLACK else BLACK
 
 
-    def move(self, end):
-        self.change_turn()
+    '''
+    move and capture
+    '''
+    def move(self, end, screen):
+        start = self.selected_position
+        piece = self.matrix[start[0]][start[1]]
         
-        piece = self.matrix[self.selected_position[0]][self.selected_position[1]]
+        # remove the piece from the starting position
+        self.matrix[start[0]][start[1]] = 0
+        
+        # reset selected position
+        self.selected_position = NULL_POSITION
 
-        # update last move
-        self.last_move = ((self.selected_position[0], self.selected_position[1]), (end[0], end[1]))
-
+        # update first move
         if type(piece) in {King, Pawn, Rook}:
             piece.first_move = False
+
+        self.animate_move(start, end, screen, piece)
 
         # pawn promotion
         if type(piece) == Pawn and ( (end[0] == 0 and piece.color == WHITE) or (end[0] == 7 and piece.color == BLACK) ):
             piece = Queen(piece.color)
 
         self.matrix[end[0]][end[1]] = piece
-        self.matrix[self.selected_position[0]][self.selected_position[1]] = 0
 
+        # update last move
+        self.last_move = ((start[0], start[1]), (end[0], end[1]))
+        self.change_turn()
         self.update_moves()
 
-        # reset selected position
-        self.selected_position = NULL_POSITION
 
-
-
-# -----------------------------------
-    def animate_move(self, screen, piece, end):
-        start = self.selected_position
-        
+    '''
+    animation for the movement of the piece
+    '''
+    def animate_move(self, start, end, screen, piece):
         y_distance = end[0] - start[0]
         x_distance = end[1] - start[1]
         frames_per_square = 10

@@ -2,7 +2,6 @@ import pygame, os
 from constants import *
 
 
-
 class Piece:
     # represent the index of the image in the list white/black
     img = -1

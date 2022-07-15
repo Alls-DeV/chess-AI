@@ -42,7 +42,7 @@ def main():
             # interaction if the player press on the board
             if event.type == pygame.MOUSEBUTTONDOWN:
                 position = pygame.mouse.get_pos()
-                board.click(position)
+                board.click(position, screen)
 
         if board.checkmate:
             run = False
