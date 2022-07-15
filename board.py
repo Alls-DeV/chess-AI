@@ -13,9 +13,9 @@ class Board:
         # place the pieces on the board
         
         # pawn
-        # for i in range(8):
-        #     self.matrix[1][i] = Pawn(BLACK)
-        #     self.matrix[6][i] = Pawn(WHITE)
+        for i in range(8):
+            self.matrix[1][i] = Pawn(BLACK)
+            self.matrix[6][i] = Pawn(WHITE)
         # black piece
         self.matrix[0][0] = Rook(BLACK)
         self.matrix[0][1] = Knight(BLACK)
