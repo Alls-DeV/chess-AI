@@ -12,12 +12,12 @@ BLACK = "b"
 NULL_POSITION = (-1, -1)
 
 board_directory = "assets/board_set"
-BACKGROUND = pygame.transform.scale(pygame.image.load(os.path.join(board_directory, "grey.jpg")), (WIDTH, HEIGHT))
+BACKGROUND = pygame.transform.scale(pygame.image.load(os.path.join(board_directory, "chessboard.jpg")), (WIDTH, HEIGHT))
 
 
 # load images of pieces into two list
 
-piece_directory = "assets/piece_set/california"
+piece_directory = "assets/piece_set/alpha"
 wP = pygame.image.load(os.path.join(piece_directory, "wP.png"))
 wR = pygame.image.load(os.path.join(piece_directory, "wR.png"))
 wN = pygame.image.load(os.path.join(piece_directory, "wN.png"))

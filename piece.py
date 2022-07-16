@@ -1,4 +1,4 @@
-import pygame, os
+import pygame
 from abc import ABC, abstractmethod
 from typing import Union
 from constants import *

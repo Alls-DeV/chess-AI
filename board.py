@@ -1,4 +1,4 @@
-import pygame, os
+import pygame
 from typing import Union
 from piece import Piece, Pawn, Rook, Knight, Bishop, Queen, King
 from constants import *
@@ -333,7 +333,9 @@ class Board:
     def click(self, position : tuple[int, int], screen : pygame.Surface):
         y, x = position[1]//SQUARE_SIZE, position[0]//SQUARE_SIZE
         
-        if self.matrix[y][x] != 0 and self.matrix[y][x].color == self.turn:
+        if (y, x) == self.selected_position:
+            self.selected_position = NULL_POSITION
+        elif self.matrix[y][x] != 0 and self.matrix[y][x].color == self.turn:
             self.selected_position = (y, x)
         else:
             if self.selected_position != NULL_POSITION and (y, x) in self.matrix[self.selected_position[0]][self.selected_position[1]].move_set:
@@ -417,7 +419,7 @@ class Board:
             
         y_distance = end[0] - start[0]
         x_distance = end[1] - start[1]
-        frames_per_square = 10
+        frames_per_square = 5
 
         # max frame count possible is 50 otherwise the piece is too slow       
         frame_count = min( 50, (abs(y_distance) + abs(x_distance)) * frames_per_square)
