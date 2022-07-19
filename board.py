@@ -49,6 +49,8 @@ class Board:
 
         self.checkmate = False
 
+        self.moving = False
+
     '''
     draw all the pieces on the screen
     '''
@@ -82,7 +84,7 @@ class Board:
                     tmp.draw(screen, position)
 
         # highlight the king if it's in check 
-        if Board.in_check(self.matrix, self.turn):
+        if self.moving == False and Board.in_check(self.matrix, self.turn):
             for y in range(8):
                 for x in range(8):
                     if self.matrix[y][x] != 0 and self.matrix[y][x].color == self.turn and type(self.matrix[y][x]) == King:
@@ -144,6 +146,21 @@ class Board:
                                     piece.move_set.remove((y, 2))
                                 if (y, 3) in piece.move_set:
                                     piece.move_set.remove((y, 3))
+
+                    # en passant
+                    if (type(piece) == Pawn and self.last_move != NULL_POSITION and
+                        type(self.matrix[self.last_move[1][0]][self.last_move[1][1]]) == Pawn and 
+                        abs(self.last_move[1][0] - self.last_move[0][0]) == 2):
+
+                            # white pawn go up while black go down, with sign I can control this
+                            sign = -1 if self.matrix[y][x].color == WHITE else 1
+                            
+                            if (Piece.est_legale(y+sign, x+1) and
+                                self.matrix[y+sign][x+1] == 0 and (y, x+1) == self.last_move[1]):
+                                self.matrix[y][x].move_set.add((y+sign, x+1))
+                            if (Piece.est_legale(y+sign, x-1) and 
+                                self.matrix[y+sign][x-1] == 0 and (y, x-1) == self.last_move[1]):
+                                self.matrix[y][x].move_set.add((y+sign, x-1))
 
                     # if there aren't possible moves, it is checkmate
                     if len(piece.move_set) > 0:
@@ -370,6 +387,11 @@ class Board:
         if type(piece) == King and abs(start[1] - end[1]) == 2:
             self.castle(start, end, screen)
 
+        # en passant
+        elif (type(piece) == Pawn and self.matrix[end[0]][end[1]] == 0 and 
+                abs(end[1] - start[1]) == 1):
+            self.en_passant(start, end, screen, piece)
+
         else:
             self.animate_move(start, end, screen, piece)
 
@@ -377,6 +399,35 @@ class Board:
         self.last_move = ((start[0], start[1]), (end[0], end[1]))
         self.change_turn()
         self.update_moves()
+
+    def en_passant(self, start : tuple[int, int], end : tuple[int, int], screen : pygame.Surface, piece : Piece):
+        self.moving = True
+
+        # remove the piece from the starting position
+        self.matrix[start[0]][start[1]] = 0
+            
+        y_distance = end[0] - start[0]
+        x_distance = end[1] - start[1]
+
+        # speed-up diagonal moves
+        frames_per_square = 10 if (y_distance == 0 or x_distance == 0) else 5
+
+        # max frame count possible is 50 otherwise the piece is too slow       
+        frame_count = min( 50, (abs(y_distance) + abs(x_distance)) * frames_per_square)
+        
+        for frame in range(frame_count + 1):
+            y, x = start[0] + y_distance*frame/frame_count, start[1] + x_distance*frame/frame_count
+            
+            screen.blit(BACKGROUND, (0, 0))
+            self.draw(screen)
+            piece.draw(screen, (y, x))
+
+            pygame.display.update()
+
+        self.matrix[end[0]][end[1]] = piece
+        self.matrix[start[0]][end[1]] = 0
+
+        self.moving = False
 
     def castle(self, start_king : tuple[int, int], end_king : tuple[int, int], screen : pygame.Surface):
         start_rook = 0 if start_king[1] > end_king[1] else 7
@@ -414,16 +465,20 @@ class Board:
     animation for the movement of the piece
     '''
     def animate_move(self, start : tuple[int, int], end : tuple[int, int], screen : pygame.Surface, piece : Piece):
+        self.moving = True
+
         # remove the piece from the starting position
         self.matrix[start[0]][start[1]] = 0
             
         y_distance = end[0] - start[0]
         x_distance = end[1] - start[1]
-        frames_per_square = 5
+
+        # speed-up diagonal moves
+        frames_per_square = 10 if (y_distance == 0 or x_distance == 0) else 5
 
         # max frame count possible is 50 otherwise the piece is too slow       
         frame_count = min( 50, (abs(y_distance) + abs(x_distance)) * frames_per_square)
-
+        
         for frame in range(frame_count + 1):
             y, x = start[0] + y_distance*frame/frame_count, start[1] + x_distance*frame/frame_count
             
@@ -432,9 +487,11 @@ class Board:
             piece.draw(screen, (y, x))
 
             pygame.display.update()
-        
+
         # pawn promotion
         if type(piece) == Pawn and ( (end[0] == 0 and piece.color == WHITE) or (end[0] == 7 and piece.color == BLACK) ):
             piece = Queen(piece.color)
 
         self.matrix[end[0]][end[1]] = piece
+
+        self.moving = False
