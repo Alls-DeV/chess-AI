@@ -1,7 +1,6 @@
 # chess
 Chess game written in python with the pygame library.
 
----
 ## Setup Instructions:
 ###### Make sure you're using python 3
 
@@ -39,4 +38,3 @@ Then, Open a command prompt window:
 pip -m install --user pygame
 python main.py
 ```
----
