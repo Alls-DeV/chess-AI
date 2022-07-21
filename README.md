@@ -1,6 +1,7 @@
 # chess
 Chess game written in python with the pygame library.
 
+
 ## Setup Instructions:
 ###### Make sure you're using python 3
 
