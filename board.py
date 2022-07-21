@@ -2,6 +2,7 @@ import pygame
 from typing import Union
 from piece import Piece, Pawn, Rook, Knight, Bishop, Queen, King
 from constants import *
+from pygame import mixer
 
 class Board:
     def __init__(self):
@@ -87,7 +88,8 @@ class Board:
         if self.moving == False and Board.in_check(self.matrix, self.turn):
             for y in range(8):
                 for x in range(8):
-                    if self.matrix[y][x] != 0 and self.matrix[y][x].color == self.turn and type(self.matrix[y][x]) == King:
+                    if (self.matrix[y][x] != 0 and self.matrix[y][x].color == self.turn and
+                        type(self.matrix[y][x]) == King):
                         screen.blit(RED_CIRCLE_NEG, (x*SQUARE_SIZE, y*SQUARE_SIZE))
 
     '''
@@ -103,18 +105,21 @@ class Board:
                 if piece != 0 and piece.color == self.turn:
                     piece.update_moves(self.matrix, (y, x))
                     
-                    # removes illegal moves that would put the king in check
-                    removed_moves = set()
-                    for move in piece.move_set:
-                        tmp_matrix = [row[:] for row in self.matrix]
-                        tmp_matrix[move[0]][move[1]] = tmp_matrix[y][x]
-                        tmp_matrix[y][x] = 0
-                        if Board.in_check(tmp_matrix, self.turn):
-                            removed_moves.add(move)
-                    
-                    for move in removed_moves:
-                        piece.move_set.remove(move)
+                    # en passant
+                    if (type(piece) == Pawn and self.last_move != NULL_POSITION and
+                        type(self.matrix[self.last_move[1][0]][self.last_move[1][1]]) == Pawn and 
+                        abs(self.last_move[1][0] - self.last_move[0][0]) == 2):
 
+                            # white pawn go up while black go down, with sign I can control this
+                            sign = -1 if self.matrix[y][x].color == WHITE else 1
+                            
+                            if (Piece.est_legale(y+sign, x+1) and
+                                self.matrix[y+sign][x+1] == 0 and (y, x+1) == self.last_move[1]):
+                                self.matrix[y][x].move_set.add((y+sign, x+1))
+                            if (Piece.est_legale(y+sign, x-1) and 
+                                self.matrix[y+sign][x-1] == 0 and (y, x-1) == self.last_move[1]):
+                                self.matrix[y][x].move_set.add((y+sign, x-1))
+                    
                     # castle
                     if type(piece) == King and piece.first_move:
                         # if king is in check can't castle
@@ -147,20 +152,19 @@ class Board:
                                 if (y, 3) in piece.move_set:
                                     piece.move_set.remove((y, 3))
 
-                    # en passant
-                    if (type(piece) == Pawn and self.last_move != NULL_POSITION and
-                        type(self.matrix[self.last_move[1][0]][self.last_move[1][1]]) == Pawn and 
-                        abs(self.last_move[1][0] - self.last_move[0][0]) == 2):
+                    # removes illegal moves that would put the king in check
+                    removed_moves = set()
+                    for move in piece.move_set:
+                        tmp_matrix = [row[:] for row in self.matrix]
+                        tmp_matrix[move[0]][move[1]] = tmp_matrix[y][x]
+                        tmp_matrix[y][x] = 0
+                        if Board.in_check(tmp_matrix, self.turn):
+                            removed_moves.add(move)
+                    
+                    for move in removed_moves:
+                        piece.move_set.remove(move)
 
-                            # white pawn go up while black go down, with sign I can control this
-                            sign = -1 if self.matrix[y][x].color == WHITE else 1
-                            
-                            if (Piece.est_legale(y+sign, x+1) and
-                                self.matrix[y+sign][x+1] == 0 and (y, x+1) == self.last_move[1]):
-                                self.matrix[y][x].move_set.add((y+sign, x+1))
-                            if (Piece.est_legale(y+sign, x-1) and 
-                                self.matrix[y+sign][x-1] == 0 and (y, x-1) == self.last_move[1]):
-                                self.matrix[y][x].move_set.add((y+sign, x-1))
+
 
                     # if there aren't possible moves, it is checkmate
                     if len(piece.move_set) > 0:
@@ -395,6 +399,8 @@ class Board:
         else:
             self.animate_move(start, end, screen, piece)
 
+
+
         # update last move
         self.last_move = ((start[0], start[1]), (end[0], end[1]))
         self.change_turn()
@@ -418,7 +424,7 @@ class Board:
         for frame in range(frame_count + 1):
             y, x = start[0] + y_distance*frame/frame_count, start[1] + x_distance*frame/frame_count
             
-            screen.blit(BACKGROUND, (0, 0))
+            screen.blit(BACKGROUND_BOARD, (0, 0))
             self.draw(screen)
             piece.draw(screen, (y, x))
 
@@ -426,6 +432,7 @@ class Board:
 
         self.matrix[end[0]][end[1]] = piece
         self.matrix[start[0]][end[1]] = 0
+        mixer.Sound("assets/sounds/capture.mp3").play()
 
         self.moving = False
 
@@ -450,7 +457,7 @@ class Board:
             x_king = start_king[1] + king_distance*frame/frame_count
             x_rook = start_rook + rook_distance*frame/frame_count
 
-            screen.blit(BACKGROUND, (0, 0))
+            screen.blit(BACKGROUND_BOARD, (0, 0))
             self.draw(screen)
             king.draw(screen, (start_king[0], x_king))
             rook.draw(screen, (start_king[0], x_rook))
@@ -460,6 +467,8 @@ class Board:
         # set piece in the end position
         self.matrix[end_king[0]][end_king[1]] = king
         self.matrix[end_king[0]][end_rook] = rook
+        
+        mixer.Sound("assets/sounds/move.mp3").play()
 
     '''
     animation for the movement of the piece
@@ -482,7 +491,7 @@ class Board:
         for frame in range(frame_count + 1):
             y, x = start[0] + y_distance*frame/frame_count, start[1] + x_distance*frame/frame_count
             
-            screen.blit(BACKGROUND, (0, 0))
+            screen.blit(BACKGROUND_BOARD, (0, 0))
             self.draw(screen)
             piece.draw(screen, (y, x))
 
@@ -491,6 +500,11 @@ class Board:
         # pawn promotion
         if type(piece) == Pawn and ( (end[0] == 0 and piece.color == WHITE) or (end[0] == 7 and piece.color == BLACK) ):
             piece = Queen(piece.color)
+
+        if self.matrix[end[0]][end[1]] == 0:
+            mixer.Sound("assets/sounds/move.mp3").play()
+        else:
+            mixer.Sound("assets/sounds/capture.mp3").play()
 
         self.matrix[end[0]][end[1]] = piece
 
