@@ -11,37 +11,31 @@ BLACK = "b"
 
 NULL_POSITION = (-1, -1)
 
+# array with the images of the king to select the piece theme
+piece_directories = ["alpha", "anarcandy", "california", "companion", "dubrovny", "fantasy", "gioco", "horsey", "kosal", "pixel"]
+KINGS = []
+for folder in piece_directories:
+    KINGS.append(pygame.image.load(os.path.join("assets/piece_set/" + folder, "wK.png")))
+    KINGS[-1] = pygame.transform.scale(KINGS[-1], (SQUARE_SIZE, SQUARE_SIZE))
+
+
+board_directories = ["blue-marble", "green", "horsey", "maple2", "metal", "pink", "wood", "wood3", "blue2", "blue3", "canvas2", "grey", "maple", "marble", "olive", "purple", "wood2", "wood4"]
+BOARDS = []
+for folder in board_directories:
+    BOARDS.append(pygame.image.load(os.path.join("assets/board_set/" + folder, folder+".thumbnail.jpg")))
+    BOARDS[-1] = pygame.transform.scale(BOARDS[-1], (SQUARE_SIZE, SQUARE_SIZE))
+
+
+color_directories = ["green", "blue", "purple", "red", "yellow"]
+SQUARES = []
+CIRCLES = []
+for folder in color_directories:
+    SQUARES.append(pygame.image.load(os.path.join("assets/highlighters/" + folder, folder+"_square.png")))
+    SQUARES[-1] = pygame.transform.scale(SQUARES[-1], (SQUARE_SIZE, SQUARE_SIZE))
+    CIRCLES.append(pygame.image.load(os.path.join("assets/highlighters/" + folder, folder+"_circle.png")))
+    CIRCLES[-1] = pygame.transform.scale(CIRCLES[-1], (SQUARE_SIZE, SQUARE_SIZE))
+
 # background images
-BACKGROUND_MENU = pygame.transform.scale(pygame.image.load(os.path.join("assets/backgrounds", "menu.jpg")), (WIDTH, HEIGHT))
+BACKGROUND_MENU = pygame.transform.scale(pygame.image.load(os.path.join("assets/backgrounds", "menu.jpeg")), (WIDTH, HEIGHT))
 BACKGROUND_OPTIONS = pygame.transform.scale(pygame.image.load(os.path.join("assets/backgrounds", "options.jpeg")), (WIDTH, HEIGHT))
 BACKGROUND_END = pygame.transform.scale(pygame.image.load(os.path.join("assets/backgrounds", "end.jpeg")), (WIDTH*3/4, HEIGHT*3/4))
-
-board_directory = "assets/board_set"
-BACKGROUND_BOARD = pygame.transform.scale(pygame.image.load(os.path.join(board_directory, "blue2.jpg")), (WIDTH, HEIGHT))
-
-# load images of pieces into two list
-piece_directory = "assets/piece_set/alpha"
-wP = pygame.image.load(os.path.join(piece_directory, "wP.png"))
-wR = pygame.image.load(os.path.join(piece_directory, "wR.png"))
-wN = pygame.image.load(os.path.join(piece_directory, "wN.png"))
-wB = pygame.image.load(os.path.join(piece_directory, "wB.png"))
-wQ = pygame.image.load(os.path.join(piece_directory, "wQ.png"))
-wK = pygame.image.load(os.path.join(piece_directory, "wK.png"))
-bP = pygame.image.load(os.path.join(piece_directory, "bP.png"))
-bR = pygame.image.load(os.path.join(piece_directory, "bR.png"))
-bN = pygame.image.load(os.path.join(piece_directory, "bN.png"))
-bB = pygame.image.load(os.path.join(piece_directory, "bB.png"))
-bQ = pygame.image.load(os.path.join(piece_directory, "bQ.png"))
-bK = pygame.image.load(os.path.join(piece_directory, "bK.png"))
-WHITE_IMAGE = [wP, wR, wN, wB, wQ, wK]
-BLACK_IMAGE = [bP, bR, bN, bB, bQ, bK]
-# resize pieces images
-for i in range(6):
-    WHITE_IMAGE[i] = pygame.transform.scale(WHITE_IMAGE[i], (SQUARE_SIZE, SQUARE_SIZE))
-    BLACK_IMAGE[i] = pygame.transform.scale(BLACK_IMAGE[i], (SQUARE_SIZE, SQUARE_SIZE))
-
-
-YELLOW_SQUARE = pygame.transform.scale(pygame.image.load(os.path.join("assets", "yellow_square.png")), (SQUARE_SIZE, SQUARE_SIZE))
-GREEN_CIRCLE = pygame.transform.scale(pygame.image.load(os.path.join("assets", "green_circle.png")), (SQUARE_SIZE, SQUARE_SIZE))
-GREEN_CIRCLE_NEG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "green_circle_neg.png")), (SQUARE_SIZE, SQUARE_SIZE))
-RED_CIRCLE_NEG = pygame.transform.scale(pygame.image.load(os.path.join("assets", "red_circle_neg.png")), (SQUARE_SIZE, SQUARE_SIZE))

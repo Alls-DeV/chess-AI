@@ -6,10 +6,9 @@ from constants import *
 
 class Piece(ABC):
     # represent the index of the image in the list white/black
-    img = -1
-    
-    def __init__(self, color : str):
+    def __init__(self, color : str, image : pygame.Surface):
         self.color = color
+        self.image = image
         self.move_set = set()
 
     @abstractmethod
@@ -18,9 +17,8 @@ class Piece(ABC):
 
     def draw(self, screen : pygame.Surface, position : tuple[int, int]):
         # assign the image
-        draw_this = WHITE_IMAGE[self.img] if self.color == WHITE else BLACK_IMAGE[self.img]
         y, x = position[0]*SQUARE_SIZE, position[1]*SQUARE_SIZE
-        screen.blit(draw_this, (x, y))
+        screen.blit(self.image, (x, y))
     
     '''
     check the validity of a move
@@ -31,11 +29,9 @@ class Piece(ABC):
 
 
 class Pawn(Piece):
-    img = 0
-
-    
-    def __init__(self, color : str):
-        super().__init__(color)
+ 
+    def __init__(self, color : str, image : pygame.Surface):
+        super().__init__(color, image)
 
         # check if the pawn has moved
         self.first_move = True
@@ -62,10 +58,9 @@ class Pawn(Piece):
 
 
 class Rook(Piece):
-    img = 1
 
-    def __init__(self, color : str):
-        super().__init__(color)
+    def __init__(self, color : str, image : pygame.Surface):
+        super().__init__(color, image)
 
         # flag for check if this rook can castle
         self.first_move = True
@@ -125,7 +120,6 @@ class Rook(Piece):
 
 
 class Knight(Piece):
-    img = 2
 
     def update_moves(self, board : list[list[Union[Piece,int]]], position : tuple[int, int]):
         y, x = position[0], position[1]
@@ -140,7 +134,6 @@ class Knight(Piece):
 
 
 class Bishop(Piece):
-    img = 3
     
     def update_moves(self, board : list[list[Union[Piece,int]]], position : tuple[int, int]):
         y, x = position[0], position[1]
@@ -166,7 +159,6 @@ class Bishop(Piece):
 
 
 class Queen(Piece):
-    img = 4
     
     def update_moves(self, board : list[list[Union[Piece,int]]], position : tuple[int, int]):
         y, x = position[0], position[1]
@@ -240,10 +232,9 @@ class Queen(Piece):
 
 
 class King(Piece):
-    img = 5
     
-    def __init__(self, color : str):
-        super().__init__(color)
+    def __init__(self, color : str, image : pygame.Surface):
+        super().__init__(color, image)
 
         # flag for check if king can castle
         self.first_move = True

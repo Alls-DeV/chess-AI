@@ -5,37 +5,72 @@ from constants import *
 from pygame import mixer
 
 class Board:
-    def __init__(self):
+    def __init__(self, folders_name : tuple[str, str, str, str]):
         self.rows = 8
         self.columns = 8
+        self.pieces_folder, self.board_folder = folders_name[0], folders_name[1]
+        self.last_move_color, self.possible_move_color = folders_name[2], folders_name[3]
+
+        self.LAST_MOVE_SQUARE = pygame.transform.scale(
+                            pygame.image.load(os.path.join("assets/highlighters/"+self.last_move_color, self.last_move_color+"_square.png")), (SQUARE_SIZE, SQUARE_SIZE))
+        self.CIRCLE = pygame.transform.scale(
+                        pygame.image.load(os.path.join("assets/highlighters/"+self.possible_move_color, self.possible_move_color+"_circle.png")), (SQUARE_SIZE, SQUARE_SIZE))
+        self.NEG_CIRCLE = pygame.transform.scale(
+                        pygame.image.load(os.path.join("assets/highlighters/"+self.possible_move_color, self.possible_move_color+"_circle_neg.png")), (SQUARE_SIZE, SQUARE_SIZE))
+        self.RED_NEG_CIRCLE = pygame.transform.scale(
+                            pygame.image.load(os.path.join("assets/highlighters/red", "red_circle_neg.png")), (SQUARE_SIZE, SQUARE_SIZE))
+
+        self.BACKGROUND_BOARD = pygame.transform.scale(
+            pygame.image.load(os.path.join("assets/board_set/"+self.board_folder, self.board_folder+".jpg")), (WIDTH, HEIGHT))
 
         # create a board 8x8
         self.matrix = [[0 for _ in range(self.columns)] for _ in range(self.rows)]
-
-        # place the pieces on the board
         
+        # load images of pieces into two list
+        piece_path = "assets/piece_set/" + self.pieces_folder
+        wP = pygame.image.load(os.path.join(piece_path, "wP.png"))
+        wR = pygame.image.load(os.path.join(piece_path, "wR.png"))
+        wN = pygame.image.load(os.path.join(piece_path, "wN.png"))
+        wB = pygame.image.load(os.path.join(piece_path, "wB.png"))
+        wQ = pygame.image.load(os.path.join(piece_path, "wQ.png"))
+        wK = pygame.image.load(os.path.join(piece_path, "wK.png"))
+        bP = pygame.image.load(os.path.join(piece_path, "bP.png"))
+        bR = pygame.image.load(os.path.join(piece_path, "bR.png"))
+        bN = pygame.image.load(os.path.join(piece_path, "bN.png"))
+        bB = pygame.image.load(os.path.join(piece_path, "bB.png"))
+        bQ = pygame.image.load(os.path.join(piece_path, "bQ.png"))
+        bK = pygame.image.load(os.path.join(piece_path, "bK.png"))
+        WHITE_IMAGE = [wP, wR, wN, wB, wQ, wK]
+        BLACK_IMAGE = [bP, bR, bN, bB, bQ, bK]
+        # resize pieces images
+        for i in range(len(WHITE_IMAGE)):
+            WHITE_IMAGE[i] = pygame.transform.scale(WHITE_IMAGE[i], (SQUARE_SIZE, SQUARE_SIZE))
+            BLACK_IMAGE[i] = pygame.transform.scale(BLACK_IMAGE[i], (SQUARE_SIZE, SQUARE_SIZE))
+        
+        # place the pieces on the board
         # pawn
         for i in range(8):
-            self.matrix[1][i] = Pawn(BLACK)
-            self.matrix[6][i] = Pawn(WHITE)
+            self.matrix[1][i] = Pawn(BLACK, BLACK_IMAGE[0])
+            self.matrix[6][i] = Pawn(WHITE, WHITE_IMAGE[0])
         # black pieces
-        self.matrix[0][0] = Rook(BLACK)
-        self.matrix[0][1] = Knight(BLACK)
-        self.matrix[0][2] = Bishop(BLACK)
-        self.matrix[0][3] = Queen(BLACK)
-        self.matrix[0][4] = King(BLACK)
-        self.matrix[0][5] = Bishop(BLACK)
-        self.matrix[0][6] = Knight(BLACK)
-        self.matrix[0][7] = Rook(BLACK)
+        self.matrix[0][0] = Rook(BLACK, BLACK_IMAGE[1])
+        self.matrix[0][1] = Knight(BLACK, BLACK_IMAGE[2])
+        self.matrix[0][2] = Bishop(BLACK, BLACK_IMAGE[3])
+        self.matrix[0][3] = Queen(BLACK, BLACK_IMAGE[4])
+        self.matrix[0][4] = King(BLACK, BLACK_IMAGE[5])
+        self.matrix[0][5] = Bishop(BLACK, BLACK_IMAGE[3])
+        self.matrix[0][6] = Knight(BLACK, BLACK_IMAGE[2])
+        self.matrix[0][7] = Rook(BLACK, BLACK_IMAGE[1])
         # white pieces
-        self.matrix[7][0] = Rook(WHITE)
-        self.matrix[7][1] = Knight(WHITE)
-        self.matrix[7][2] = Bishop(WHITE)
-        self.matrix[7][3] = Queen(WHITE)
-        self.matrix[7][4] = King(WHITE)
-        self.matrix[7][5] = Bishop(WHITE)
-        self.matrix[7][6] = Knight(WHITE)
-        self.matrix[7][7] = Rook(WHITE)
+        self.matrix[7][0] = Rook(WHITE, WHITE_IMAGE[1])
+        self.matrix[7][1] = Knight(WHITE, WHITE_IMAGE[2])
+        self.matrix[7][2] = Bishop(WHITE, WHITE_IMAGE[3])
+        self.matrix[7][3] = Queen(WHITE, WHITE_IMAGE[4])
+        self.matrix[7][4] = King(WHITE, WHITE_IMAGE[5])
+        self.matrix[7][5] = Bishop(WHITE, WHITE_IMAGE[3])
+        self.matrix[7][6] = Knight(WHITE, WHITE_IMAGE[2])
+        self.matrix[7][7] = Rook(WHITE, WHITE_IMAGE[1])
+
 
         # flag to understand who has to move
         self.turn = WHITE
@@ -55,12 +90,13 @@ class Board:
     '''
     draw all the pieces on the screen
     '''
-    def draw(self, screen : pygame.Surface):
+    def draw(self, SCREEN : pygame.Surface):
+        SCREEN.blit(self.BACKGROUND_BOARD, (0, 0))
 
         # highlight last move
         if self.last_move != NULL_POSITION:
-            screen.blit(YELLOW_SQUARE, (self.last_move[0][1]*SQUARE_SIZE, self.last_move[0][0]*SQUARE_SIZE))
-            screen.blit(YELLOW_SQUARE, (self.last_move[1][1]*SQUARE_SIZE, self.last_move[1][0]*SQUARE_SIZE))
+            SCREEN.blit(self.LAST_MOVE_SQUARE, (self.last_move[0][1]*SQUARE_SIZE, self.last_move[0][0]*SQUARE_SIZE))
+            SCREEN.blit(self.LAST_MOVE_SQUARE, (self.last_move[1][1]*SQUARE_SIZE, self.last_move[1][0]*SQUARE_SIZE))
         
         # if a piece is selected show the possible moves
         if self.selected_position != NULL_POSITION:
@@ -70,11 +106,11 @@ class Board:
             for possible_move in selected_piece.move_set:
                 # use a negative circle for the capture
                 if self.matrix[possible_move[0]][possible_move[1]]:
-                    screen.blit(GREEN_CIRCLE_NEG, (possible_move[1]*SQUARE_SIZE, possible_move[0]*SQUARE_SIZE))
+                    SCREEN.blit(self.NEG_CIRCLE, (possible_move[1]*SQUARE_SIZE, possible_move[0]*SQUARE_SIZE))
 
                 # use a circle for the movement on an empty square
                 else:
-                    screen.blit(GREEN_CIRCLE, (possible_move[1]*SQUARE_SIZE, possible_move[0]*SQUARE_SIZE))
+                    SCREEN.blit(self.CIRCLE, (possible_move[1]*SQUARE_SIZE, possible_move[0]*SQUARE_SIZE))
 
         # draw the piece
         for y in range(self.rows):
@@ -82,7 +118,7 @@ class Board:
                 tmp = self.matrix[y][x]
                 position = (y, x)
                 if tmp:
-                    tmp.draw(screen, position)
+                    tmp.draw(SCREEN, position)
 
         # highlight the king if it's in check 
         if self.moving == False and Board.in_check(self.matrix, self.turn):
@@ -90,7 +126,7 @@ class Board:
                 for x in range(8):
                     if (self.matrix[y][x] != 0 and self.matrix[y][x].color == self.turn and
                         type(self.matrix[y][x]) == King):
-                        screen.blit(RED_CIRCLE_NEG, (x*SQUARE_SIZE, y*SQUARE_SIZE))
+                        SCREEN.blit(self.RED_NEG_CIRCLE, (x*SQUARE_SIZE, y*SQUARE_SIZE))
 
     '''
     update the possible moves of each piece on the board
@@ -351,7 +387,7 @@ class Board:
     '''
     manage the interaction with the mouse button, like selecting or move piece
     '''
-    def click(self, position : tuple[int, int], screen : pygame.Surface):
+    def click(self, position : tuple[int, int], SCREEN : pygame.Surface):
         y, x = position[1]//SQUARE_SIZE, position[0]//SQUARE_SIZE
         
         if (y, x) == self.selected_position:
@@ -360,9 +396,7 @@ class Board:
             self.selected_position = (y, x)
         else:
             if self.selected_position != NULL_POSITION and (y, x) in self.matrix[self.selected_position[0]][self.selected_position[1]].move_set:
-                
-                # self.animate_move(screen, piece, (y, x))
-                self.move((y, x), screen)
+                self.move((y, x), SCREEN)
             else:
                 self.selected_position = NULL_POSITION
 
@@ -372,10 +406,7 @@ class Board:
     def change_turn(self):
         self.turn = WHITE if self.turn == BLACK else BLACK
 
-    '''
-    move and capture
-    '''
-    def move(self, end : tuple[int, int], screen : pygame.Surface):
+    def move(self, end : tuple[int, int], SCREEN : pygame.Surface):
         # TODO rimuovere piece non e' necessario passarlo
         start = self.selected_position
         piece = self.matrix[start[0]][start[1]]
@@ -389,15 +420,15 @@ class Board:
         
         # castle
         if type(piece) == King and abs(start[1] - end[1]) == 2:
-            self.castle(start, end, screen)
+            self.castle(start, end, SCREEN)
 
         # en passant
         elif (type(piece) == Pawn and self.matrix[end[0]][end[1]] == 0 and 
                 abs(end[1] - start[1]) == 1):
-            self.en_passant(start, end, screen, piece)
+            self.en_passant(start, end, SCREEN, piece)
 
         else:
-            self.animate_move(start, end, screen, piece)
+            self.animate_move(start, end, SCREEN, piece)
 
 
 
@@ -406,7 +437,7 @@ class Board:
         self.change_turn()
         self.update_moves()
 
-    def en_passant(self, start : tuple[int, int], end : tuple[int, int], screen : pygame.Surface, piece : Piece):
+    def en_passant(self, start : tuple[int, int], end : tuple[int, int], SCREEN : pygame.Surface, piece : Piece):
         self.moving = True
 
         # remove the piece from the starting position
@@ -414,19 +445,13 @@ class Board:
             
         y_distance = end[0] - start[0]
         x_distance = end[1] - start[1]
-
-        # speed-up diagonal moves
-        frames_per_square = 10 if (y_distance == 0 or x_distance == 0) else 5
-
-        # max frame count possible is 50 otherwise the piece is too slow       
-        frame_count = min( 50, (abs(y_distance) + abs(x_distance)) * frames_per_square)
-        
+        frame_count = 20
         for frame in range(frame_count + 1):
             y, x = start[0] + y_distance*frame/frame_count, start[1] + x_distance*frame/frame_count
             
-            screen.blit(BACKGROUND_BOARD, (0, 0))
-            self.draw(screen)
-            piece.draw(screen, (y, x))
+            SCREEN.blit(self.BACKGROUND_BOARD, (0, 0))
+            self.draw(SCREEN)
+            piece.draw(SCREEN, (y, x))
 
             pygame.display.update()
 
@@ -436,7 +461,8 @@ class Board:
 
         self.moving = False
 
-    def castle(self, start_king : tuple[int, int], end_king : tuple[int, int], screen : pygame.Surface):
+    def castle(self, start_king : tuple[int, int], end_king : tuple[int, int], SCREEN : pygame.Surface):
+        # starting x of the rook
         start_rook = 0 if start_king[1] > end_king[1] else 7
         
         king = self.matrix[start_king[0]][start_king[1]]
@@ -447,33 +473,29 @@ class Board:
         self.matrix[start_king[0]][start_rook] = 0
 
         # animation for castle
-
         end_rook = 3 if start_king[1] > end_king[1] else 5
         king_distance = end_king[1] - start_king[1]
         rook_distance = end_rook - start_rook
         frame_count = 20
-
         for frame in range(frame_count + 1):
             x_king = start_king[1] + king_distance*frame/frame_count
             x_rook = start_rook + rook_distance*frame/frame_count
 
-            screen.blit(BACKGROUND_BOARD, (0, 0))
-            self.draw(screen)
-            king.draw(screen, (start_king[0], x_king))
-            rook.draw(screen, (start_king[0], x_rook))
+            SCREEN.blit(self.BACKGROUND_BOARD, (0, 0))
+            # draw independently king, rook and the board with other pieces
+            self.draw(SCREEN)
+            king.draw(SCREEN, (start_king[0], x_king))
+            rook.draw(SCREEN, (start_king[0], x_rook))
 
             pygame.display.update()
         
-        # set piece in the end position
+        # set rook and king in the end position
         self.matrix[end_king[0]][end_king[1]] = king
         self.matrix[end_king[0]][end_rook] = rook
         
-        mixer.Sound("assets/sounds/move.mp3").play()
+        mixer.Sound("assets/sounds/capture.mp3").play()
 
-    '''
-    animation for the movement of the piece
-    '''
-    def animate_move(self, start : tuple[int, int], end : tuple[int, int], screen : pygame.Surface, piece : Piece):
+    def animate_move(self, start : tuple[int, int], end : tuple[int, int], SCREEN : pygame.Surface, piece : Piece):
         self.moving = True
 
         # remove the piece from the starting position
@@ -491,9 +513,9 @@ class Board:
         for frame in range(frame_count + 1):
             y, x = start[0] + y_distance*frame/frame_count, start[1] + x_distance*frame/frame_count
             
-            screen.blit(BACKGROUND_BOARD, (0, 0))
-            self.draw(screen)
-            piece.draw(screen, (y, x))
+            SCREEN.blit(self.BACKGROUND_BOARD, (0, 0))
+            self.draw(SCREEN)
+            piece.draw(SCREEN, (y, x))
 
             pygame.display.update()
 
