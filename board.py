@@ -8,8 +8,8 @@ class Board:
     def __init__(self, folders_name : tuple[str, str, str, str]):
         self.rows = 8
         self.columns = 8
-        self.pieces_folder, self.board_folder = folders_name[0], folders_name[1]
-        self.last_move_color, self.possible_move_color = folders_name[2], folders_name[3]
+        self.board_folder, self.pieces_folder = folders_name[0], folders_name[1]
+        self.possible_move_color, self.last_move_color = folders_name[2], folders_name[3]
 
         self.LAST_MOVE_SQUARE = pygame.transform.scale(
                             pygame.image.load(os.path.join("assets/highlighters/"+self.last_move_color, self.last_move_color+"_square.png")), (SQUARE_SIZE, SQUARE_SIZE))
