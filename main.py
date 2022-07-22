@@ -17,10 +17,10 @@ def get_font(size : int):
     return pygame.font.Font("assets/font.otf", size)
 
 def menu():
+    folders_name = (piece_directories[0], board_directories[0], color_directories[0], color_directories[0])
     pygame.display.set_caption("Menu")
 
     while True:
-        folders_name = (piece_directories[0], board_directories[0], color_directories[0], color_directories[0])
         SCREEN.blit(BACKGROUND_MENU, (0, 0))
         mouse_pos = pygame.mouse.get_pos()
 
@@ -192,9 +192,9 @@ def game(folders_name : tuple[str, str, str, str]):
         pygame.display.update()
 
     winner = "BLACK" if board.turn == WHITE else "WHITE"
-    end_screen(winner)
+    end_screen(winner, folders_name)
 
-def end_screen(winner : str):
+def end_screen(winner : str, folders_name : tuple[str, str, str, str]):
     while True:
         mouse_pos = pygame.mouse.get_pos()
 
@@ -221,7 +221,7 @@ def end_screen(winner : str):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if REMATCH_BUTTON.check_for_input(mouse_pos):
                     mixer.Sound("assets/sounds/select.mp3").play()
-                    game()
+                    game(folders_name)
                 if MAIN_MENU_BUTTON.check_for_input(mouse_pos):
                     mixer.Sound("assets/sounds/select.mp3").play()
                     menu()
