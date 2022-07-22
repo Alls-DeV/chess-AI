@@ -129,18 +129,18 @@ def options() -> tuple[str, str, str, str]:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # last move highlight color
                 if RIGHT_SQUARE_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/move.mp3").play()
+                    mixer.Sound("assets/sounds/change.mp3").play()
                     square_index += 1
                 if LEFT_SQUARE_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/move.mp3").play()
+                    mixer.Sound("assets/sounds/change.mp3").play()
                     square_index -= 1
 
                 # possible moves color
                 if RIGHT_CIRCLE_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/move.mp3").play()
+                    mixer.Sound("assets/sounds/change.mp3").play()
                     circle_index += 1
                 if LEFT_CIRCLE_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/move.mp3").play()
+                    mixer.Sound("assets/sounds/change.mp3").play()
                     circle_index -= 1
 
                 # piece set

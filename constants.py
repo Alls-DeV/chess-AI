@@ -26,7 +26,7 @@ for folder in board_directories:
     BOARDS[-1] = pygame.transform.scale(BOARDS[-1], (SQUARE_SIZE, SQUARE_SIZE))
 
 
-color_directories = ["green", "blue", "purple", "red", "yellow"]
+color_directories = ["green", "blue", "purple", "red", "yellow", "horsey"]
 SQUARES = []
 CIRCLES = []
 for folder in color_directories:
