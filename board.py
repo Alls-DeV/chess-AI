@@ -2,30 +2,59 @@ import pygame
 from typing import Union
 from piece import Piece, Pawn, Rook, Knight, Bishop, Queen, King
 from constants import *
-from pygame import mixer
+from pygame import Surface, mixer
 
 class Board:
     def __init__(self, folders_name : tuple[str, str, str, str]):
         self.rows = 8
         self.columns = 8
-        self.board_folder, self.pieces_folder = folders_name[0], folders_name[1]
-        self.possible_move_color, self.last_move_color = folders_name[2], folders_name[3]
 
+        self.board_folder, self.pieces_folder = folders_name[0], folders_name[1]
+        self.possible_moves_color, self.last_move_color = folders_name[2], folders_name[3]
+        
+        # create a board 8x8
+        self.matrix = [[0 for _ in range(self.columns)] for _ in range(self.rows)]
+
+        # two list with the images of white and black pieces
+        self.WHITE_IMAGE, self.BLACK_IMAGE = self.load_pieces_image()
+        
+        # fill the matrix with pieces
+        self.place_pieces()
+
+        # flag to understand who has to move
+        self.turn = WHITE
+
+        # position of the selected piece
+        self.selected_position = NULL_POSITION
+
+        # last move is a pair of pairs. the pairs represent the starting and ending position of the last move
+        self.last_move = NULL_POSITION
+
+        # calculate all the possible moves of each piece
+        self.update_moves()
+
+        # flag to know if the game is over
+        self.checkmate = False
+
+        # flag to know if we are animating the movement of a piece
+        self.moving = False
+
+        # images used in the method draw()
+        self.BACKGROUND_BOARD = pygame.transform.scale(
+            pygame.image.load(os.path.join("assets/board_set/"+self.board_folder, self.board_folder+".jpg")), (WIDTH, HEIGHT))
         self.LAST_MOVE_SQUARE = pygame.transform.scale(
                             pygame.image.load(os.path.join("assets/highlighters/"+self.last_move_color, self.last_move_color+"_square.png")), (SQUARE_SIZE, SQUARE_SIZE))
         self.CIRCLE = pygame.transform.scale(
-                        pygame.image.load(os.path.join("assets/highlighters/"+self.possible_move_color, self.possible_move_color+"_circle.png")), (SQUARE_SIZE, SQUARE_SIZE))
+                        pygame.image.load(os.path.join("assets/highlighters/"+self.possible_moves_color, self.possible_moves_color+"_circle.png")), (SQUARE_SIZE, SQUARE_SIZE))
         self.NEG_CIRCLE = pygame.transform.scale(
-                        pygame.image.load(os.path.join("assets/highlighters/"+self.possible_move_color, self.possible_move_color+"_circle_neg.png")), (SQUARE_SIZE, SQUARE_SIZE))
+                        pygame.image.load(os.path.join("assets/highlighters/"+self.possible_moves_color, self.possible_moves_color+"_circle_neg.png")), (SQUARE_SIZE, SQUARE_SIZE))
         self.RED_NEG_CIRCLE = pygame.transform.scale(
                             pygame.image.load(os.path.join("assets/highlighters/red", "red_circle_neg.png")), (SQUARE_SIZE, SQUARE_SIZE))
 
-        self.BACKGROUND_BOARD = pygame.transform.scale(
-            pygame.image.load(os.path.join("assets/board_set/"+self.board_folder, self.board_folder+".jpg")), (WIDTH, HEIGHT))
-
-        # create a board 8x8
-        self.matrix = [[0 for _ in range(self.columns)] for _ in range(self.rows)]
-        
+    '''
+    return two list with all the images of the pieces
+    '''
+    def load_pieces_image(self) -> tuple[list[Surface], list[Surface]]:
         # load images of pieces into two list
         piece_path = "assets/piece_set/" + self.pieces_folder
         wP = pygame.image.load(os.path.join(piece_path, "wP.png"))
@@ -47,45 +76,34 @@ class Board:
             WHITE_IMAGE[i] = pygame.transform.scale(WHITE_IMAGE[i], (SQUARE_SIZE, SQUARE_SIZE))
             BLACK_IMAGE[i] = pygame.transform.scale(BLACK_IMAGE[i], (SQUARE_SIZE, SQUARE_SIZE))
         
-        # place the pieces on the board
+        return WHITE_IMAGE, BLACK_IMAGE
+    
+    '''
+    place the pieces in self.matrix
+    '''
+    def place_pieces(self):
         # pawn
         for i in range(8):
-            self.matrix[1][i] = Pawn(BLACK, BLACK_IMAGE[0])
-            self.matrix[6][i] = Pawn(WHITE, WHITE_IMAGE[0])
+            self.matrix[1][i] = Pawn(BLACK, self.BLACK_IMAGE[0])
+            self.matrix[6][i] = Pawn(WHITE, self.WHITE_IMAGE[0])
         # black pieces
-        self.matrix[0][0] = Rook(BLACK, BLACK_IMAGE[1])
-        self.matrix[0][1] = Knight(BLACK, BLACK_IMAGE[2])
-        self.matrix[0][2] = Bishop(BLACK, BLACK_IMAGE[3])
-        self.matrix[0][3] = Queen(BLACK, BLACK_IMAGE[4])
-        self.matrix[0][4] = King(BLACK, BLACK_IMAGE[5])
-        self.matrix[0][5] = Bishop(BLACK, BLACK_IMAGE[3])
-        self.matrix[0][6] = Knight(BLACK, BLACK_IMAGE[2])
-        self.matrix[0][7] = Rook(BLACK, BLACK_IMAGE[1])
+        self.matrix[0][0] = Rook(BLACK, self.BLACK_IMAGE[1])
+        self.matrix[0][1] = Knight(BLACK, self.BLACK_IMAGE[2])
+        self.matrix[0][2] = Bishop(BLACK, self.BLACK_IMAGE[3])
+        self.matrix[0][3] = Queen(BLACK, self.BLACK_IMAGE[4])
+        self.matrix[0][4] = King(BLACK, self.BLACK_IMAGE[5])
+        self.matrix[0][5] = Bishop(BLACK, self.BLACK_IMAGE[3])
+        self.matrix[0][6] = Knight(BLACK, self.BLACK_IMAGE[2])
+        self.matrix[0][7] = Rook(BLACK, self.BLACK_IMAGE[1])
         # white pieces
-        self.matrix[7][0] = Rook(WHITE, WHITE_IMAGE[1])
-        self.matrix[7][1] = Knight(WHITE, WHITE_IMAGE[2])
-        self.matrix[7][2] = Bishop(WHITE, WHITE_IMAGE[3])
-        self.matrix[7][3] = Queen(WHITE, WHITE_IMAGE[4])
-        self.matrix[7][4] = King(WHITE, WHITE_IMAGE[5])
-        self.matrix[7][5] = Bishop(WHITE, WHITE_IMAGE[3])
-        self.matrix[7][6] = Knight(WHITE, WHITE_IMAGE[2])
-        self.matrix[7][7] = Rook(WHITE, WHITE_IMAGE[1])
-
-
-        # flag to understand who has to move
-        self.turn = WHITE
-
-        # position of the selected piece
-        self.selected_position = NULL_POSITION
-
-        self.last_move = NULL_POSITION
-
-        # calculate all the possible moves of each piece
-        self.update_moves()
-
-        self.checkmate = False
-
-        self.moving = False
+        self.matrix[7][0] = Rook(WHITE, self.WHITE_IMAGE[1])
+        self.matrix[7][1] = Knight(WHITE, self.WHITE_IMAGE[2])
+        self.matrix[7][2] = Bishop(WHITE, self.WHITE_IMAGE[3])
+        self.matrix[7][3] = Queen(WHITE, self.WHITE_IMAGE[4])
+        self.matrix[7][4] = King(WHITE, self.WHITE_IMAGE[5])
+        self.matrix[7][5] = Bishop(WHITE, self.WHITE_IMAGE[3])
+        self.matrix[7][6] = Knight(WHITE, self.WHITE_IMAGE[2])
+        self.matrix[7][7] = Rook(WHITE, self.WHITE_IMAGE[1])
 
     '''
     draw all the pieces on the screen
@@ -117,7 +135,7 @@ class Board:
             for x in range(self.columns):
                 tmp = self.matrix[y][x]
                 position = (y, x)
-                if tmp:
+                if tmp != 0:
                     tmp.draw(SCREEN, position)
 
         # highlight the king if it's in check 
@@ -138,6 +156,8 @@ class Board:
         for y in range(self.rows):
             for x in range(self.columns):
                 piece = self.matrix[y][x]
+
+                # update the possible moves only on the piece of the turn's color
                 if piece != 0 and piece.color == self.turn:
                     piece.update_moves(self.matrix, (y, x))
                     
@@ -145,10 +165,10 @@ class Board:
                     if (type(piece) == Pawn and self.last_move != NULL_POSITION and
                         type(self.matrix[self.last_move[1][0]][self.last_move[1][1]]) == Pawn and 
                         abs(self.last_move[1][0] - self.last_move[0][0]) == 2):
-
-                            # white pawn go up while black go down, with sign I can control this
+                            # white pawn go up while black go down, sign can control this
                             sign = -1 if self.matrix[y][x].color == WHITE else 1
                             
+                            # add to the move set the en passant
                             if (Piece.est_legale(y+sign, x+1) and
                                 self.matrix[y+sign][x+1] == 0 and (y, x+1) == self.last_move[1]):
                                 self.matrix[y][x].move_set.add((y+sign, x+1))
@@ -189,20 +209,17 @@ class Board:
                                     piece.move_set.remove((y, 3))
 
                     # removes illegal moves that would put the king in check
-                    removed_moves = set()
+                    illegal_moves = set()
                     for move in piece.move_set:
                         tmp_matrix = [row[:] for row in self.matrix]
                         tmp_matrix[move[0]][move[1]] = tmp_matrix[y][x]
                         tmp_matrix[y][x] = 0
                         if Board.in_check(tmp_matrix, self.turn):
-                            removed_moves.add(move)
-                    
-                    for move in removed_moves:
+                            illegal_moves.add(move)
+                    for move in illegal_moves:
                         piece.move_set.remove(move)
 
-
-
-                    # if there aren't possible moves, it is checkmate
+                    # if a piece can do to at least one move it isn't checkmate
                     if len(piece.move_set) > 0:
                         self.checkmate = False
 
@@ -214,6 +231,7 @@ class Board:
         att = Board.attacked_positions(matrix, color)
         
         king_position = NULL_POSITION
+        # find king's position
         for y in range(8):
             for x in range(8):
                 if matrix[y][x] != 0 and matrix[y][x].color == color and type(matrix[y][x]) == King:
@@ -407,7 +425,6 @@ class Board:
         self.turn = WHITE if self.turn == BLACK else BLACK
 
     def move(self, end : tuple[int, int], SCREEN : pygame.Surface):
-        # TODO rimuovere piece non e' necessario passarlo
         start = self.selected_position
         piece = self.matrix[start[0]][start[1]]
         
