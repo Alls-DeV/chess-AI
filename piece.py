@@ -5,12 +5,14 @@ from constants import *
 
 
 class Piece(ABC):
-    # represent the index of the image in the list white/black
     def __init__(self, color : str, image : pygame.Surface):
         self.color = color
         self.image = image
         self.move_set = set()
 
+    '''
+    update move_set with the possible move of the piece
+    '''
     @abstractmethod
     def update_moves(self, board, position):
         pass
@@ -29,7 +31,6 @@ class Piece(ABC):
 
 
 class Pawn(Piece):
- 
     def __init__(self, color : str, image : pygame.Surface):
         super().__init__(color, image)
 
@@ -58,7 +59,6 @@ class Pawn(Piece):
 
 
 class Rook(Piece):
-
     def __init__(self, color : str, image : pygame.Surface):
         super().__init__(color, image)
 
@@ -120,7 +120,6 @@ class Rook(Piece):
 
 
 class Knight(Piece):
-
     def update_moves(self, board : list[list[Union[Piece,int]]], position : tuple[int, int]):
         y, x = position[0], position[1]
         
@@ -134,7 +133,6 @@ class Knight(Piece):
 
 
 class Bishop(Piece):
-    
     def update_moves(self, board : list[list[Union[Piece,int]]], position : tuple[int, int]):
         y, x = position[0], position[1]
 
@@ -159,7 +157,6 @@ class Bishop(Piece):
 
 
 class Queen(Piece):
-    
     def update_moves(self, board : list[list[Union[Piece,int]]], position : tuple[int, int]):
         y, x = position[0], position[1]
 
@@ -232,7 +229,6 @@ class Queen(Piece):
 
 
 class King(Piece):
-    
     def __init__(self, color : str, image : pygame.Surface):
         super().__init__(color, image)
 
