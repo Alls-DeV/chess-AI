@@ -29,9 +29,9 @@ class Button():
         base_color = "#000000" if light_theme else "#ffffff"
         hovering_color = "#636f87" if light_theme else "#99c0ff"
 
-        PLAY_BUTTON = Button((WIDTH/2, HEIGHT/3+HEIGHT/8), "PLAY",
+        PLAY_BUTTON = Button((WIDTH/2, HEIGHT/3), "PLAY",
                             pygame.font.Font("assets/font.otf", WIDTH//8), base_color, hovering_color)
-        OPTIONS_BUTTON = Button((WIDTH/2, 2*HEIGHT/3+HEIGHT/8), "OPTIONS",
+        OPTIONS_BUTTON = Button((WIDTH/2, HEIGHT*2/3), "OPTIONS",
                                 pygame.font.Font("assets/font.otf", WIDTH//8), base_color, hovering_color)
         
         return PLAY_BUTTON, OPTIONS_BUTTON
@@ -58,10 +58,12 @@ class Button():
         return VOLUME_ON_BUTTON if volume_status else VOLUME_OFF_BUTTON
     
     def theme_button(light_theme : bool) -> Button:
+        hovering_color = "#636f87" if light_theme else "#99c0ff"
+
         LIGHT_BUTTON = Button((WIDTH*8/9, HEIGHT*9/10), SUN,
-                                pygame.font.Font("assets/FontAwesome.otf", WIDTH//8), "Yellow", "Red")
+                                pygame.font.Font("assets/FontAwesome.otf", WIDTH//8), "Orange", hovering_color)
         DARK_BUTTON = Button((WIDTH*8/9, HEIGHT*9/10), MOON,
-                                pygame.font.Font("assets/FontAwesome.otf", WIDTH//8), "Dark Blue", "Red")
+                                pygame.font.Font("assets/FontAwesome.otf", WIDTH//8), "Dark Blue", hovering_color)
         return DARK_BUTTON if light_theme else LIGHT_BUTTON
 
     def end_buttons(light_theme : bool) -> tuple[Button, Button]:

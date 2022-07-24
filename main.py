@@ -46,11 +46,6 @@ def menu():
             SCREEN.blit(DARK_BACKGROUND, (0, 0))
         mouse_pos = pygame.mouse.get_pos()
 
-        # main menu caption
-        MENU_TITLE = get_font(WIDTH//8).render("MAIN MENU", True, "#695123" if light_theme else "#ad8639")
-        MENU_RECT = MENU_TITLE.get_rect(center=(WIDTH/2, HEIGHT/8))
-        SCREEN.blit(MENU_TITLE, MENU_RECT)
-
         # buttons for playing and change the settings
         PLAY_BUTTON, OPTIONS_BUTTON = Button.menu_buttons(light_theme)
 
