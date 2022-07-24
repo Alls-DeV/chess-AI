@@ -29,21 +29,27 @@ class Button():
     
     def menu_buttons() -> tuple[Button, Button]:
         PLAY_BUTTON = Button((WIDTH/2, HEIGHT/3+HEIGHT/8), "PLAY",
-                            pygame.font.Font("assets/font.otf", WIDTH//8),"#000000", "Dark Blue")
+                            pygame.font.Font("assets/font.otf", WIDTH//8),"#000000", "Blue")
         OPTIONS_BUTTON = Button((WIDTH/2, 2*HEIGHT/3+HEIGHT/8), "OPTIONS",
-                                pygame.font.Font("assets/font.otf", WIDTH//8), "#000000", "Dark Blue")
+                                pygame.font.Font("assets/font.otf", WIDTH//8), "#000000", "Blue")
         
         return PLAY_BUTTON, OPTIONS_BUTTON
 
 
     def right_left_buttons(height : float) -> tuple[Button, Button]:
         RIGHT_BUTTON = Button((WIDTH*3/4+SQUARE_SIZE, height), ">",
-                                    pygame.font.Font("assets/font.otf", WIDTH//8), "White", "Dark Blue")
+                                    pygame.font.Font("assets/font.otf", WIDTH//8), "White", "Blue")
         LEFT_BUTTON = Button((WIDTH*3/4-SQUARE_SIZE, height), "<",
-                                    pygame.font.Font("assets/font.otf", WIDTH//8), "White", "Dark Blue")
+                                    pygame.font.Font("assets/font.otf", WIDTH//8), "White", "Blue")
 
         return RIGHT_BUTTON, LEFT_BUTTON
 
+    def volume_button(volume_status : bool) -> Button:
+        VOLUME_ON_BUTTON = Button((WIDTH/4, HEIGHT*9/10), VOLUME_ON,
+                                pygame.font.Font("assets/FontAwesome.otf", WIDTH//8), "White", "Red")
+        VOLUME_OFF_BUTTON = Button((WIDTH/4, HEIGHT*9/10), VOLUME_OFF,
+                                pygame.font.Font("assets/FontAwesome.otf", WIDTH//8), "White", "Dark Green")
+        return VOLUME_ON_BUTTON if volume_status else VOLUME_OFF_BUTTON
 
     def end_buttons() -> tuple[Button, Button]:
         REMATCH_BUTTON = Button((WIDTH/2, HEIGHT/3+HEIGHT/5), "REMATCH",

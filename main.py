@@ -17,6 +17,8 @@ clock = pygame.time.Clock()
 # each index refers respectively to [board, piece, possible moves color, last move color]
 index_folders = [0, 0, 0, 0]
 
+volume_status = True
+
 '''
 from the index_folders return the names of the folders
 '''
@@ -55,16 +57,19 @@ def menu():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/select.mp3").play()
+                    if volume_status:
+                        mixer.Sound("assets/sounds/select.mp3").play()
                     game()
                 if OPTIONS_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/select.mp3").play()
+                    if volume_status:
+                        mixer.Sound("assets/sounds/select.mp3").play()
                     options()
 
         pygame.display.update()
 
 def options():
     pygame.display.set_caption("OPTIONS")
+    global volume_status
     while True:
         SCREEN.blit(BACKGROUND_OPTIONS, (0, 0))
         mouse_pos = pygame.mouse.get_pos()
@@ -122,8 +127,12 @@ def options():
         buttons.append(RIGHT_SQUARE_BUTTON)
         buttons.append(LEFT_SQUARE_BUTTON)
 
+        # button to turn the volume on and off
+        VOLUME_BUTTON = Button.volume_button(volume_status)
+        buttons.append(VOLUME_BUTTON)
+
         # button for come back to the main menu
-        BACK_BUTTON = Button((WIDTH/2, HEIGHT*9/10), "BACK", get_font(WIDTH//8), "White", "Dark Blue")
+        BACK_BUTTON = Button((WIDTH*3/4, HEIGHT*9/10), "BACK", get_font(WIDTH//8), "White", "Dark Blue")
         buttons.append(BACK_BUTTON)
 
         # change the color of the buttons if mouse goes over them
@@ -138,45 +147,60 @@ def options():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 # board set
                 if RIGHT_BOARD_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/move.mp3").play()
+                    if volume_status:
+                        mixer.Sound("assets/sounds/move.mp3").play()
                     index_folders[0] += 1
                 if LEFT_BOARD_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/move.mp3").play()
+                    if volume_status:
+                        mixer.Sound("assets/sounds/move.mp3").play()
                     index_folders[0] -= 1
 
                 # pieces set
                 if RIGHT_PIECE_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/capture.mp3").play()
+                    if volume_status:
+                        mixer.Sound("assets/sounds/capture.mp3").play()
                     index_folders[1] += 1
                 if LEFT_PIECE_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/capture.mp3").play()
+                    if volume_status:
+                        mixer.Sound("assets/sounds/capture.mp3").play()
                     index_folders[1] -= 1
 
                 # possible moves color
                 if RIGHT_CIRCLE_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/change.mp3").play()
+                    if volume_status:
+                        mixer.Sound("assets/sounds/change.mp3").play()
                     index_folders[2] += 1
                 if LEFT_CIRCLE_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/change.mp3").play()
+                    if volume_status:
+                        mixer.Sound("assets/sounds/change.mp3").play()
                     index_folders[2] -= 1
 
                 # last move color
                 if RIGHT_SQUARE_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/change.mp3").play()
+                    if volume_status:
+                        mixer.Sound("assets/sounds/change.mp3").play()
                     index_folders[3] += 1
                 if LEFT_SQUARE_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/change.mp3").play()
+                    if volume_status:
+                        mixer.Sound("assets/sounds/change.mp3").play()
                     index_folders[3] -= 1
 
+                if VOLUME_BUTTON.check_for_input(mouse_pos):
+                    volume_status = not volume_status
+                    if volume_status:
+                        if volume_status:
+                            mixer.Sound("assets/sounds/select.mp3").play()
+
                 if BACK_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/select.mp3").play()
+                    if volume_status:
+                        mixer.Sound("assets/sounds/select.mp3").play()
                     return
 
         pygame.display.update()
 
 def game():
     # create a board giving the settings preferences like the pieces set, chessboard and colors for highlighting squares
-    board = Board(folders_name())
+    board = Board(folders_name(), volume_status)
     pygame.display.set_caption("CHESS")
     
     while True:
@@ -224,10 +248,12 @@ def end_screen(winner : str):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if REMATCH_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/select.mp3").play()
+                    if volume_status:
+                        mixer.Sound("assets/sounds/select.mp3").play()
                     game()
                 if MAIN_MENU_BUTTON.check_for_input(mouse_pos):
-                    mixer.Sound("assets/sounds/select.mp3").play()
+                    if volume_status:
+                        mixer.Sound("assets/sounds/select.mp3").play()
                     menu()
 
         pygame.display.update()

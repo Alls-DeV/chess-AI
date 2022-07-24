@@ -39,3 +39,8 @@ for folder in color_folders:
 BACKGROUND_MENU = pygame.transform.scale(pygame.image.load(os.path.join("assets/backgrounds", "menu.jpeg")), (WIDTH, HEIGHT))
 BACKGROUND_OPTIONS = pygame.transform.scale(pygame.image.load(os.path.join("assets/backgrounds", "options.jpeg")), (WIDTH, HEIGHT))
 BACKGROUND_END = pygame.transform.scale(pygame.image.load(os.path.join("assets/backgrounds", "end.jpeg")), (WIDTH*3/4, HEIGHT*3/4))
+
+SUN = ""
+MOON = ""
+VOLUME_ON = ""
+VOLUME_OFF = ""

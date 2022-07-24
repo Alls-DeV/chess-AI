@@ -5,13 +5,15 @@ from constants import *
 from pygame import Surface, mixer
 
 class Board:
-    def __init__(self, folders_name : tuple[str, str, str, str]):
+    def __init__(self, folders_name : tuple[str, str, str, str], volume_status : bool):
         self.rows = 8
         self.columns = 8
 
         self.board_folder, self.pieces_folder = folders_name[0], folders_name[1]
         self.possible_moves_color, self.last_move_color = folders_name[2], folders_name[3]
-        
+
+        self.volume_status = volume_status
+
         # create a board 8x8
         self.matrix = [[0 for _ in range(self.columns)] for _ in range(self.rows)]
 
@@ -474,7 +476,8 @@ class Board:
 
         self.matrix[end[0]][end[1]] = piece
         self.matrix[start[0]][end[1]] = 0
-        mixer.Sound("assets/sounds/capture.mp3").play()
+        if self.volume_status:
+            mixer.Sound("assets/sounds/capture.mp3").play()
 
         self.moving = False
 
@@ -510,7 +513,8 @@ class Board:
         self.matrix[end_king[0]][end_king[1]] = king
         self.matrix[end_king[0]][end_rook] = rook
         
-        mixer.Sound("assets/sounds/capture.mp3").play()
+        if self.volume_status:
+            mixer.Sound("assets/sounds/capture.mp3").play()
 
     def animate_move(self, start : tuple[int, int], end : tuple[int, int], SCREEN : pygame.Surface, piece : Piece):
         self.moving = True
@@ -541,9 +545,11 @@ class Board:
             piece = Queen(piece.color)
 
         if self.matrix[end[0]][end[1]] == 0:
-            mixer.Sound("assets/sounds/move.mp3").play()
+            if self.volume_status:
+                mixer.Sound("assets/sounds/move.mp3").play()
         else:
-            mixer.Sound("assets/sounds/capture.mp3").play()
+            if self.volume_status:
+                mixer.Sound("assets/sounds/capture.mp3").play()
 
         self.matrix[end[0]][end[1]] = piece
 
