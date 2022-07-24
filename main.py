@@ -17,7 +17,11 @@ clock = pygame.time.Clock()
 # each index refers respectively to [board, piece, possible moves color, last move color]
 index_folders = [0, 0, 0, 0]
 
+# flag for check if the volume is on or off
 volume_status = True
+
+# flag for check if the light theme is active
+light_theme = True
 
 '''
 from the index_folders return the names of the folders
@@ -33,21 +37,27 @@ def get_font(size : int):
     return pygame.font.Font("assets/font.otf", size)
 
 def menu():
+    global light_theme
     pygame.display.set_caption("MENU")
     while True:
-        SCREEN.blit(BACKGROUND_MENU, (0, 0))
+        if light_theme:
+            SCREEN.blit(LIGHT_BACKGROUND, (0, 0))
+        else:
+            SCREEN.blit(DARK_BACKGROUND, (0, 0))
         mouse_pos = pygame.mouse.get_pos()
 
         # main menu caption
-        MENU_TITLE = get_font(WIDTH//8).render("MAIN MENU", True, "#695123")
+        MENU_TITLE = get_font(WIDTH//8).render("MAIN MENU", True, "#695123" if light_theme else "#ad8639")
         MENU_RECT = MENU_TITLE.get_rect(center=(WIDTH/2, HEIGHT/8))
         SCREEN.blit(MENU_TITLE, MENU_RECT)
 
         # buttons for playing and change the settings
-        PLAY_BUTTON, OPTIONS_BUTTON = Button.menu_buttons()
+        PLAY_BUTTON, OPTIONS_BUTTON = Button.menu_buttons(light_theme)
+
+        THEME_BUTTON = Button.theme_button(light_theme)
 
         # change the color of the buttons if mouse goes over them
-        for button in [PLAY_BUTTON, OPTIONS_BUTTON]:
+        for button in [PLAY_BUTTON, OPTIONS_BUTTON, THEME_BUTTON]:
             button.change_color(mouse_pos)
             button.draw(SCREEN)
         
@@ -64,6 +74,10 @@ def menu():
                     if volume_status:
                         mixer.Sound("assets/sounds/select.mp3").play()
                     options()
+                if THEME_BUTTON.check_for_input(mouse_pos):
+                    if volume_status:
+                        mixer.Sound("assets/sounds/select.mp3").play()
+                    light_theme = not light_theme
 
         pygame.display.update()
 
@@ -71,68 +85,73 @@ def options():
     pygame.display.set_caption("OPTIONS")
     global volume_status
     while True:
-        SCREEN.blit(BACKGROUND_OPTIONS, (0, 0))
+        if light_theme:
+            SCREEN.blit(LIGHT_BACKGROUND, (0, 0))
+        else:
+            SCREEN.blit(DARK_BACKGROUND, (0, 0))
         mouse_pos = pygame.mouse.get_pos()
+        text_color = "Black" if light_theme else "White"
 
         # list with all the buttons in the options screen
         buttons = []
 
         # CHANGE CHESSBOARD
         # caption
-        BOARD_SETUP = get_font(WIDTH//20).render("BOARD SET", True, "White")
+        BOARD_SETUP = get_font(WIDTH//20).render("BOARD SET", True, text_color)
         BOARD_RECT = BOARD_SETUP.get_rect(center=(WIDTH/4, HEIGHT/8))
         SCREEN.blit(BOARD_SETUP, BOARD_RECT)
         # add to the screen the preview of the chessboard
         SCREEN.blit(BOARDS[index_folders[0]%len(BOARDS)], (WIDTH*3/4-SQUARE_SIZE/2, HEIGHT/8-SQUARE_SIZE/2))
         # buttons for change the chessboard
-        RIGHT_BOARD_BUTTON, LEFT_BOARD_BUTTON = Button.right_left_buttons(HEIGHT/8)
+        RIGHT_BOARD_BUTTON, LEFT_BOARD_BUTTON = Button.right_left_buttons(HEIGHT/8, light_theme)
         buttons.append(RIGHT_BOARD_BUTTON)
         buttons.append(LEFT_BOARD_BUTTON)
 
         # CHANGE PIECES SET
         # caption
-        PIECE_SETUP = get_font(WIDTH//20).render("PIECE SET", True, "White")
+        PIECE_SETUP = get_font(WIDTH//20).render("PIECE SET", True, text_color)
         PIECE_RECT = PIECE_SETUP.get_rect(center=(WIDTH/4, HEIGHT*3/10))
         SCREEN.blit(PIECE_SETUP, PIECE_RECT)
         # add to the screen the king of the set selected
         SCREEN.blit(KINGS[index_folders[1]%len(KINGS)], (WIDTH*3/4-SQUARE_SIZE/2, HEIGHT*3/10-SQUARE_SIZE/2))
         # buttons for change the pieces set
-        RIGHT_PIECE_BUTTON, LEFT_PIECE_BUTTON = Button.right_left_buttons(HEIGHT*3/10)
+        RIGHT_PIECE_BUTTON, LEFT_PIECE_BUTTON = Button.right_left_buttons(HEIGHT*3/10, light_theme)
         buttons.append(RIGHT_PIECE_BUTTON)
         buttons.append(LEFT_PIECE_BUTTON)
 
         # CHANGE THE HIGHLIGHTING COLOR FOR THE POSSIBLE MOVES
         # caption
-        CIRCLE_SETUP = get_font(WIDTH//20).render("POSSIBLE MOVE", True, "White")
+        CIRCLE_SETUP = get_font(WIDTH//20).render("POSSIBLE MOVE", True, text_color)
         CIRCLE_RECT = CIRCLE_SETUP.get_rect(center=(WIDTH/4, HEIGHT*5/10))
         SCREEN.blit(CIRCLE_SETUP, CIRCLE_RECT)
         # add to the screen the chessboard preview and how the highlight circle appear on it
         SCREEN.blit(BOARDS[index_folders[0]%len(BOARDS)], (WIDTH*3/4-SQUARE_SIZE/2, HEIGHT*5/10-SQUARE_SIZE/2))
         SCREEN.blit(CIRCLES[index_folders[2]%len(CIRCLES)], (WIDTH*3/4-SQUARE_SIZE/2, HEIGHT*5/10-SQUARE_SIZE/2))
         # buttons for change color of the possible moves
-        RIGHT_CIRCLE_BUTTON, LEFT_CIRCLE_BUTTON = Button.right_left_buttons(HEIGHT*5/10)
+        RIGHT_CIRCLE_BUTTON, LEFT_CIRCLE_BUTTON = Button.right_left_buttons(HEIGHT*5/10, light_theme)
         buttons.append(RIGHT_CIRCLE_BUTTON)
         buttons.append(LEFT_CIRCLE_BUTTON)
 
         # CHANGE THE HIGHLIGHTINT COLOR FOR THE LAST MOVE
         # caption
-        SQUARE_SETUP = get_font(WIDTH//20).render("LAST MOVE", True, "White")
+        SQUARE_SETUP = get_font(WIDTH//20).render("LAST MOVE", True, text_color)
         SQUARE_RECT = SQUARE_SETUP.get_rect(center=(WIDTH/4, HEIGHT*7/10))
         SCREEN.blit(SQUARE_SETUP, SQUARE_RECT)
         # add to the screen the chessboard preview and how the highlight square appear on it
         SCREEN.blit(BOARDS[index_folders[0]%len(BOARDS)], (WIDTH*3/4-SQUARE_SIZE/2, HEIGHT*7/10-SQUARE_SIZE/2))
         SCREEN.blit(SQUARES[index_folders[3]%len(SQUARES)], (WIDTH*3/4-SQUARE_SIZE/2, HEIGHT*7/10-SQUARE_SIZE/2))
         # buttons for change color of last move
-        RIGHT_SQUARE_BUTTON, LEFT_SQUARE_BUTTON = Button.right_left_buttons(HEIGHT*7/10)
+        RIGHT_SQUARE_BUTTON, LEFT_SQUARE_BUTTON = Button.right_left_buttons(HEIGHT*7/10, light_theme)
         buttons.append(RIGHT_SQUARE_BUTTON)
         buttons.append(LEFT_SQUARE_BUTTON)
 
         # button to turn the volume on and off
-        VOLUME_BUTTON = Button.volume_button(volume_status)
+        VOLUME_BUTTON = Button.volume_button(volume_status, light_theme)
         buttons.append(VOLUME_BUTTON)
 
         # button for come back to the main menu
-        BACK_BUTTON = Button((WIDTH*3/4, HEIGHT*9/10), "BACK", get_font(WIDTH//8), "White", "Dark Blue")
+        BACK_BUTTON = Button((WIDTH*3/4, HEIGHT*9/10), "BACK",
+                    get_font(WIDTH//8), text_color, "#636f87" if light_theme else "#99c0ff")
         buttons.append(BACK_BUTTON)
 
         # change the color of the buttons if mouse goes over them
@@ -226,16 +245,19 @@ def game():
 
 def end_screen(winner : str):
     while True:
-        SCREEN.blit(BACKGROUND_END, (WIDTH/2-WIDTH*3/8, HEIGHT/6))
+        if light_theme:
+            SCREEN.blit(LIGHT_END_BACKGROUND, (WIDTH/2-WIDTH*3/8, HEIGHT/6))
+        else:
+            SCREEN.blit(DARK_END_BACKGROUND, (WIDTH/2-WIDTH*3/8, HEIGHT/6))
         mouse_pos = pygame.mouse.get_pos()
 
-        # caption with the winner's color
-        END_TITLE = get_font(WIDTH//8).render(winner+" WIN", True, winner)
+        # caption with the winner
+        END_TITLE = get_font(WIDTH//8).render(winner+" WIN", True, "#000000" if light_theme else "#ffffff")
         END_RECT = END_TITLE.get_rect(center=(WIDTH/2, HEIGHT/6+WIDTH//8))
         SCREEN.blit(END_TITLE, END_RECT)
 
         # buttons for rematch and come back to the main menu
-        REMATCH_BUTTON, MAIN_MENU_BUTTON = Button.end_buttons()
+        REMATCH_BUTTON, MAIN_MENU_BUTTON = Button.end_buttons(light_theme)
 
         # change the color of the buttons if mouse goes over them
         for button in [REMATCH_BUTTON, MAIN_MENU_BUTTON]:

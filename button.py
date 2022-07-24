@@ -27,34 +27,52 @@ class Button():
             self.text = self.font.render(self.text_input, True, self.base_color)
     
     
-    def menu_buttons() -> tuple[Button, Button]:
+    def menu_buttons(light_theme : bool) -> tuple[Button, Button]:
+        base_color = "#000000" if light_theme else "#ffffff"
+        hovering_color = "#636f87" if light_theme else "#99c0ff"
+
         PLAY_BUTTON = Button((WIDTH/2, HEIGHT/3+HEIGHT/8), "PLAY",
-                            pygame.font.Font("assets/font.otf", WIDTH//8),"#000000", "Blue")
+                            pygame.font.Font("assets/font.otf", WIDTH//8), base_color, hovering_color)
         OPTIONS_BUTTON = Button((WIDTH/2, 2*HEIGHT/3+HEIGHT/8), "OPTIONS",
-                                pygame.font.Font("assets/font.otf", WIDTH//8), "#000000", "Blue")
+                                pygame.font.Font("assets/font.otf", WIDTH//8), base_color, hovering_color)
         
         return PLAY_BUTTON, OPTIONS_BUTTON
 
+    def right_left_buttons(height : float, light_theme : bool) -> tuple[Button, Button]:
+        base_color = "#000000" if light_theme else "#ffffff"
+        hovering_color = "#636f87" if light_theme else "#99c0ff"
 
-    def right_left_buttons(height : float) -> tuple[Button, Button]:
         RIGHT_BUTTON = Button((WIDTH*3/4+SQUARE_SIZE, height), ">",
-                                    pygame.font.Font("assets/font.otf", WIDTH//8), "White", "Blue")
+                                    pygame.font.Font("assets/font.otf", WIDTH//8), base_color, hovering_color)
         LEFT_BUTTON = Button((WIDTH*3/4-SQUARE_SIZE, height), "<",
-                                    pygame.font.Font("assets/font.otf", WIDTH//8), "White", "Blue")
+                                    pygame.font.Font("assets/font.otf", WIDTH//8), base_color, hovering_color)
 
         return RIGHT_BUTTON, LEFT_BUTTON
 
-    def volume_button(volume_status : bool) -> Button:
-        VOLUME_ON_BUTTON = Button((WIDTH/4, HEIGHT*9/10), VOLUME_ON,
-                                pygame.font.Font("assets/FontAwesome.otf", WIDTH//8), "White", "Red")
-        VOLUME_OFF_BUTTON = Button((WIDTH/4, HEIGHT*9/10), VOLUME_OFF,
-                                pygame.font.Font("assets/FontAwesome.otf", WIDTH//8), "White", "Dark Green")
-        return VOLUME_ON_BUTTON if volume_status else VOLUME_OFF_BUTTON
+    def volume_button(volume_status : bool, light_theme : bool) -> Button:
+        base_color = "#000000" if light_theme else "#ffffff"
+        hovering_color = "#636f87" if light_theme else "#99c0ff"
 
-    def end_buttons() -> tuple[Button, Button]:
+        VOLUME_ON_BUTTON = Button((WIDTH/4, HEIGHT*9/10), VOLUME_ON,
+                                pygame.font.Font("assets/FontAwesome.otf", WIDTH//8), base_color, hovering_color)
+        VOLUME_OFF_BUTTON = Button((WIDTH/4, HEIGHT*9/10), VOLUME_OFF,
+                                pygame.font.Font("assets/FontAwesome.otf", WIDTH//8), base_color, hovering_color)
+        return VOLUME_ON_BUTTON if volume_status else VOLUME_OFF_BUTTON
+    
+    def theme_button(light_theme : bool) -> Button:
+        LIGHT_BUTTON = Button((WIDTH*8/9, HEIGHT*9/10), SUN,
+                                pygame.font.Font("assets/FontAwesome.otf", WIDTH//8), "Yellow", "Red")
+        DARK_BUTTON = Button((WIDTH*8/9, HEIGHT*9/10), MOON,
+                                pygame.font.Font("assets/FontAwesome.otf", WIDTH//8), "Dark Blue", "Red")
+        return DARK_BUTTON if light_theme else LIGHT_BUTTON
+
+    def end_buttons(light_theme : bool) -> tuple[Button, Button]:
+        base_color = "#000000" if light_theme else "#ffffff"
+        hovering_color = "#636f87" if light_theme else "#99c0ff"
+
         REMATCH_BUTTON = Button((WIDTH/2, HEIGHT/3+HEIGHT/5), "REMATCH",
-                                pygame.font.Font("assets/font.otf", WIDTH//8), "Gray", "Green")
+                                pygame.font.Font("assets/font.otf", WIDTH//8), base_color, hovering_color)
         MAIN_MENU_BUTTON = Button((WIDTH/2, HEIGHT/3+HEIGHT/2), "MENU",
-                                    pygame.font.Font("assets/font.otf", WIDTH//8), "Gray", "Green")
+                                    pygame.font.Font("assets/font.otf", WIDTH//8), base_color, hovering_color)
 
         return REMATCH_BUTTON, MAIN_MENU_BUTTON

@@ -19,7 +19,7 @@ for folder in piece_folders:
     KINGS[-1] = pygame.transform.scale(KINGS[-1], (SQUARE_SIZE, SQUARE_SIZE))
 
 
-board_folders = ["blue-marble", "green", "horsey", "maple2", "metal", "pink", "wood", "wood3", "blue2", "blue3", "canvas2", "grey", "maple", "marble", "olive", "purple", "wood2", "wood4"]
+board_folders = ["green", "horsey", "maple2", "metal", "pink", "wood", "wood3", "blue2", "blue3", "canvas2", "grey", "maple", "marble", "olive", "purple", "wood2", "wood4"]
 BOARDS = []
 for folder in board_folders:
     BOARDS.append(pygame.image.load(os.path.join("assets/board_set/" + folder, folder+".thumbnail.jpg")))
@@ -36,9 +36,10 @@ for folder in color_folders:
     CIRCLES[-1] = pygame.transform.scale(CIRCLES[-1], (SQUARE_SIZE, SQUARE_SIZE))
 
 # background images
-BACKGROUND_MENU = pygame.transform.scale(pygame.image.load(os.path.join("assets/backgrounds", "menu.jpeg")), (WIDTH, HEIGHT))
-BACKGROUND_OPTIONS = pygame.transform.scale(pygame.image.load(os.path.join("assets/backgrounds", "options.jpeg")), (WIDTH, HEIGHT))
-BACKGROUND_END = pygame.transform.scale(pygame.image.load(os.path.join("assets/backgrounds", "end.jpeg")), (WIDTH*3/4, HEIGHT*3/4))
+LIGHT_BACKGROUND = pygame.transform.scale(pygame.image.load(os.path.join("assets/backgrounds", "light.jpeg")), (WIDTH, HEIGHT))
+DARK_BACKGROUND = pygame.transform.scale(pygame.image.load(os.path.join("assets/backgrounds", "dark.jpeg")), (WIDTH, HEIGHT))
+LIGHT_END_BACKGROUND = pygame.transform.scale(pygame.image.load(os.path.join("assets/backgrounds", "light.jpeg")), (WIDTH*3/4, HEIGHT*3/4))
+DARK_END_BACKGROUND = pygame.transform.scale(pygame.image.load(os.path.join("assets/backgrounds", "dark.jpeg")), (WIDTH*3/4, HEIGHT*3/4))
 
 SUN = ""
 MOON = ""
