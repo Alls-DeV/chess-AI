@@ -54,10 +54,10 @@ class Board:
         self.RED_NEG_CIRCLE = pygame.transform.scale(
                             pygame.image.load(os.path.join("assets/highlighters/red", "red_circle_neg.png")), (SQUARE_SIZE, SQUARE_SIZE))
 
-    '''
-    return two list with all the images of the pieces
-    '''
     def load_pieces_image(self) -> tuple[list[Surface], list[Surface]]:
+        '''
+        return two list with all the images of the pieces
+        '''
         # load images of pieces into two list
         piece_path = "assets/piece_set/" + self.pieces_folder
         wP = pygame.image.load(os.path.join(piece_path, "wP.png"))
@@ -81,10 +81,10 @@ class Board:
         
         return WHITE_IMAGE, BLACK_IMAGE
     
-    '''
-    place the pieces in self.matrix
-    '''
     def place_pieces(self):
+        '''
+        place the pieces in self.matrix
+        '''
         # pawn
         for i in range(8):
             self.matrix[1][i] = Pawn(BLACK, PAWN_VALUE, self.BLACK_IMAGE[0])
@@ -113,10 +113,10 @@ class Board:
         self.matrix[7][6] = Knight(WHITE, KNIGHT_VALUE, self.WHITE_IMAGE[2])
         self.matrix[7][7] = Rook(WHITE, ROOK_VALUE, self.WHITE_IMAGE[1])
 
-    '''
-    draw all the pieces on the screen
-    '''
     def draw(self, SCREEN : pygame.Surface):
+        '''
+        draw all the pieces on the screen
+        '''
         SCREEN.blit(self.BACKGROUND_BOARD, (0, 0))
 
         # highlight last move
@@ -154,10 +154,10 @@ class Board:
                         type(self.matrix[y][x]) == King):
                         SCREEN.blit(self.RED_NEG_CIRCLE, (x*SQUARE_SIZE, y*SQUARE_SIZE))
 
-    '''
-    update the possible moves of each piece on the board
-    '''
     def update_moves(self):
+        '''
+        update the possible moves of each piece on the board
+        '''
 
         self.checkmate = True
 
@@ -231,11 +231,11 @@ class Board:
                     if len(piece.move_set) > 0:
                         self.checkmate = False
 
-    '''
-    check if the king in the matrix is attacked
-    '''
     @staticmethod
     def in_check(matrix, color : str):
+        '''
+        check if the king in the matrix is attacked
+        '''
         att = Board.attacked_positions(matrix, color)
         
         king_position = NULL_POSITION
@@ -247,11 +247,11 @@ class Board:
 
         return king_position in att
 
-    '''
-    calculate all the square attacked from a player in matrix
-    '''
     @staticmethod
     def attacked_positions(matrix : list[list[Union[Piece, int]]], color : str):
+        '''
+        calculate all the square attacked from a player in matrix
+        '''
 
         attacked = set()
 
@@ -410,10 +410,10 @@ class Board:
         
         return attacked
 
-    '''
-    manage the interaction with the mouse button, like selecting or move piece
-    '''
     def click(self, position : tuple[int, int], SCREEN : pygame.Surface):
+        '''
+        manage the interaction with the mouse button, like selecting or move piece
+        '''
         y, x = position[1]//SQUARE_SIZE, position[0]//SQUARE_SIZE
         
         if (y, x) == self.selected_position:
@@ -426,10 +426,10 @@ class Board:
             else:
                 self.selected_position = NULL_POSITION
 
-    '''
-    swap the color of the turn
-    '''
     def change_turn(self):
+        '''
+        swap the color of the turn
+        '''
         self.turn = WHITE if self.turn == BLACK else BLACK
 
     def move(self, start :tuple[int, int], end : tuple[int, int], SCREEN : pygame.Surface):

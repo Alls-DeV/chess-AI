@@ -11,11 +11,11 @@ class Piece(ABC):
         self.value = value
         self.move_set = set()
 
-    '''
-    update move_set with the possible move of the piece
-    '''
     @abstractmethod
     def update_moves(self, board, position):
+        '''
+        update move_set with the possible move of the piece
+        '''
         pass
 
     def draw(self, screen : pygame.Surface, position : tuple[int, int]):
@@ -23,11 +23,11 @@ class Piece(ABC):
         y, x = position[0]*SQUARE_SIZE, position[1]*SQUARE_SIZE
         screen.blit(self.image, (x, y))
     
-    '''
-    check the validity of a move
-    '''
     @staticmethod
     def est_legale(y : int, x : int):
+        '''
+        check the validity of a move
+        '''
         return 0 <= y < 8 and 0 <= x < 8
 
 

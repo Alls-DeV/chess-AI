@@ -1,4 +1,8 @@
-Chess game written in python with the pygame library.
+Chess game written in python with the pygame library.  The chess engine uses the minimax search tree, with alpha-beta pruning to reduce search times, to find the best move based on the following heuristics:
+
+* material
+* position of the piece
+* number of possible legal moves
 
 ---
 ## Setup Instructions:
@@ -38,3 +42,7 @@ Then, Open a command prompt window:
 pip -m install --user pygame
 python main.py
 ```
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+

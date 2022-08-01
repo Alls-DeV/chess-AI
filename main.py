@@ -25,17 +25,17 @@ volume_status = True
 # flag for check if the light theme is active
 light_theme = True
 
-'''
-from the index_folders return the names of the folders
-'''
 def folders_name() -> tuple[str, str, str, str]:
+    '''
+    from the index_folders return the names of the folders
+    '''
     return (board_folders[index_folders[0]], piece_folders[index_folders[1]],
             color_folders[index_folders[2]], color_folders[index_folders[3]])
 
-'''
-from a size return the font resized
-'''
 def get_font(size : int):
+    '''
+    from a size return the font resized
+    '''
     return pygame.font.Font("assets/font.otf", size)
 
 def menu():
@@ -254,10 +254,10 @@ def select_mode():
 
         pygame.display.update()
 
-'''
-player vs player
-'''
 def friend():
+    '''
+    player vs player
+    '''
     # create a board giving the settings preferences like the pieces set, chessboard and colors for highlighting squares
     board = Board(folders_name(), volume_status)
     pygame.display.set_caption("CHESS")
@@ -285,10 +285,10 @@ def friend():
         winner = "DRAW"
     end_screen(winner)
 
-'''
-player vs AI
-'''
 def computer():
+    '''
+    player vs AI
+    '''
     # create a board giving the settings preferences like the pieces set, chessboard and colors for highlighting squares
     board = Board(folders_name(), volume_status)
     pygame.display.set_caption("CHESS")
@@ -299,6 +299,7 @@ def computer():
         if board.checkmate:
             break
 
+        # the black is the AI
         if board.turn == BLACK:
             pygame.display.update()
             move = minimax(board.copy(), 3, -inf, inf, BLACK)[0]

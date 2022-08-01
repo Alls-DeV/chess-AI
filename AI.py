@@ -4,10 +4,10 @@ from piece import Pawn, Rook, Knight, Bishop, Queen, King
 from board import Board
 from constants import *
 
-'''
-evaluate the score of the position counting the relative strength of the pieces on the board
-'''
 def evaluate(matrix):
+    '''
+    evaluate the score of the position counting the relative strength of the pieces on the board
+    '''
     score = 0
     for y in range(8):
         for x in range(8):
@@ -32,10 +32,10 @@ def evaluate(matrix):
                     score += kingEvalWhite[y][x] if matrix[y][x].color == WHITE else -kingEvalBlack[y][x]
     return score
 
-''' 
-Minimax algorithm with alpha-beta pruning determines the best move from the current board
-'''
 def minimax(matrix, depth, alpha, beta, maximizing_color):
+    ''' 
+    Minimax algorithm with alpha-beta pruning determines the best move from the current board
+    '''
     if depth == 0:
         return [NoneType, evaluate(matrix)]
     best_move = -1
