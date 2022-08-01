@@ -1,3 +1,4 @@
+import copy
 import pygame
 from typing import Union
 from piece import Piece, Pawn, Rook, Knight, Bishop, Queen, King
@@ -86,26 +87,31 @@ class Board:
     def place_pieces(self):
         # pawn
         for i in range(8):
-            self.matrix[1][i] = Pawn(BLACK, self.BLACK_IMAGE[0])
-            self.matrix[6][i] = Pawn(WHITE, self.WHITE_IMAGE[0])
+            self.matrix[1][i] = Pawn(BLACK, PAWN_VALUE, self.BLACK_IMAGE[0])
+            self.matrix[6][i] = Pawn(WHITE, PAWN_VALUE, self.WHITE_IMAGE[0])
         # black pieces
-        self.matrix[0][0] = Rook(BLACK, self.BLACK_IMAGE[1])
-        self.matrix[0][1] = Knight(BLACK, self.BLACK_IMAGE[2])
-        self.matrix[0][2] = Bishop(BLACK, self.BLACK_IMAGE[3])
-        self.matrix[0][3] = Queen(BLACK, self.BLACK_IMAGE[4])
-        self.matrix[0][4] = King(BLACK, self.BLACK_IMAGE[5])
-        self.matrix[0][5] = Bishop(BLACK, self.BLACK_IMAGE[3])
-        self.matrix[0][6] = Knight(BLACK, self.BLACK_IMAGE[2])
-        self.matrix[0][7] = Rook(BLACK, self.BLACK_IMAGE[1])
+        self.matrix[0][0] = Rook(BLACK, ROOK_VALUE, self.BLACK_IMAGE[1])
+        self.matrix[0][1] = Knight(BLACK, KNIGHT_VALUE, self.BLACK_IMAGE[2])
+        self.matrix[0][2] = Bishop(BLACK, BISHOP_VALUE, self.BLACK_IMAGE[3])
+        
+        self.matrix[0][5] = Queen(BLACK, QUEEN_VALUE, self.BLACK_IMAGE[4])
+        self.matrix[0][6] = Queen(BLACK, QUEEN_VALUE, self.BLACK_IMAGE[4])
+
+
+        self.matrix[0][3] = Queen(BLACK, QUEEN_VALUE, self.BLACK_IMAGE[4])
+        self.matrix[0][4] = King(BLACK, KING_VALUE, self.BLACK_IMAGE[5])
+        self.matrix[0][5] = Bishop(BLACK, BISHOP_VALUE, self.BLACK_IMAGE[3])
+        self.matrix[0][6] = Knight(BLACK, KNIGHT_VALUE, self.BLACK_IMAGE[2])
+        self.matrix[0][7] = Rook(BLACK, ROOK_VALUE, self.BLACK_IMAGE[1])
         # white pieces
-        self.matrix[7][0] = Rook(WHITE, self.WHITE_IMAGE[1])
-        self.matrix[7][1] = Knight(WHITE, self.WHITE_IMAGE[2])
-        self.matrix[7][2] = Bishop(WHITE, self.WHITE_IMAGE[3])
-        self.matrix[7][3] = Queen(WHITE, self.WHITE_IMAGE[4])
-        self.matrix[7][4] = King(WHITE, self.WHITE_IMAGE[5])
-        self.matrix[7][5] = Bishop(WHITE, self.WHITE_IMAGE[3])
-        self.matrix[7][6] = Knight(WHITE, self.WHITE_IMAGE[2])
-        self.matrix[7][7] = Rook(WHITE, self.WHITE_IMAGE[1])
+        self.matrix[7][0] = Rook(WHITE, ROOK_VALUE, self.WHITE_IMAGE[1])
+        self.matrix[7][1] = Knight(WHITE, KNIGHT_VALUE, self.WHITE_IMAGE[2])
+        self.matrix[7][2] = Bishop(WHITE, BISHOP_VALUE, self.WHITE_IMAGE[3])
+        self.matrix[7][3] = Queen(WHITE, QUEEN_VALUE, self.WHITE_IMAGE[4])
+        self.matrix[7][4] = King(WHITE, KING_VALUE, self.WHITE_IMAGE[5])
+        self.matrix[7][5] = Bishop(WHITE, BISHOP_VALUE, self.WHITE_IMAGE[3])
+        self.matrix[7][6] = Knight(WHITE, KNIGHT_VALUE, self.WHITE_IMAGE[2])
+        self.matrix[7][7] = Rook(WHITE, ROOK_VALUE, self.WHITE_IMAGE[1])
 
     '''
     draw all the pieces on the screen
@@ -117,7 +123,7 @@ class Board:
         if self.last_move != NULL_POSITION:
             SCREEN.blit(self.LAST_MOVE_SQUARE, (self.last_move[0][1]*SQUARE_SIZE, self.last_move[0][0]*SQUARE_SIZE))
             SCREEN.blit(self.LAST_MOVE_SQUARE, (self.last_move[1][1]*SQUARE_SIZE, self.last_move[1][0]*SQUARE_SIZE))
-        
+
         # if a piece is selected show the possible moves
         if self.selected_position != NULL_POSITION:
             y, x = self.selected_position[0], self.selected_position[1]
@@ -416,7 +422,7 @@ class Board:
             self.selected_position = (y, x)
         else:
             if self.selected_position != NULL_POSITION and (y, x) in self.matrix[self.selected_position[0]][self.selected_position[1]].move_set:
-                self.move((y, x), SCREEN)
+                self.move(self.selected_position, (y, x), SCREEN)
             else:
                 self.selected_position = NULL_POSITION
 
@@ -426,8 +432,7 @@ class Board:
     def change_turn(self):
         self.turn = WHITE if self.turn == BLACK else BLACK
 
-    def move(self, end : tuple[int, int], SCREEN : pygame.Surface):
-        start = self.selected_position
+    def move(self, start :tuple[int, int], end : tuple[int, int], SCREEN : pygame.Surface):
         piece = self.matrix[start[0]][start[1]]
         
         # reset selected position
@@ -541,9 +546,12 @@ class Board:
             pygame.display.update()
 
         # pawn promotion
-        if type(piece) == Pawn and ( (end[0] == 0 and piece.color == WHITE) or (end[0] == 7 and piece.color == BLACK) ):
-            piece = Queen(piece.color)
-
+        if type(piece) == Pawn:
+            if end[0] == 0 and piece.color == WHITE:
+                piece = Queen(WHITE, QUEEN_VALUE, self.WHITE_IMAGE[4])
+            if end[0] == 7 and piece.color == BLACK:
+                piece = Queen(BLACK, QUEEN_VALUE, self.BLACK_IMAGE[4])
+        
         if self.matrix[end[0]][end[1]] == 0:
             if self.volume_status:
                 mixer.Sound("assets/sounds/move.mp3").play()
@@ -554,3 +562,36 @@ class Board:
         self.matrix[end[0]][end[1]] = piece
 
         self.moving = False
+
+    def copy(self):
+        res = [[0 for _ in range(8)] for _ in range(8)]
+        for y in range(8):
+            for x in range(8):
+                if self.matrix[y][x] != 0:
+                    if(type(self.matrix[y][x]) == Pawn):
+                        res[y][x] = Pawn(self.matrix[y][x].color, self.matrix[y][x].value, self.matrix[y][x].image)
+                        res[y][x].first_move = self.matrix[y][x].first_move 
+                        res[y][x].move_set = self.matrix[y][x].move_set
+
+                    elif(type(self.matrix[y][x]) == Rook):
+                        res[y][x] = Rook(self.matrix[y][x].color, self.matrix[y][x].value, self.matrix[y][x].image)
+                        res[y][x].first_move = self.matrix[y][x].first_move
+                        res[y][x].move_set = self.matrix[y][x].move_set
+
+                    elif(type(self.matrix[y][x]) == Knight):
+                        res[y][x] = Knight(self.matrix[y][x].color, self.matrix[y][x].value, self.matrix[y][x].image)
+                        res[y][x].move_set = self.matrix[y][x].move_set
+
+                    elif(type(self.matrix[y][x]) == Bishop):
+                        res[y][x] = Bishop(self.matrix[y][x].color, self.matrix[y][x].value, self.matrix[y][x].image)
+                        res[y][x].move_set = self.matrix[y][x].move_set
+
+                    elif(type(self.matrix[y][x]) == Queen):
+                        res[y][x] = Queen(self.matrix[y][x].color, self.matrix[y][x].value, self.matrix[y][x].image)
+                        res[y][x].move_set = self.matrix[y][x].move_set
+
+                    elif(type(self.matrix[y][x]) == King):
+                        res[y][x] = King(self.matrix[y][x].color, self.matrix[y][x].value, self.matrix[y][x].image)
+                        res[y][x].first_move = self.matrix[y][x].first_move 
+                        res[y][x].move_set = self.matrix[y][x].move_set
+        return res

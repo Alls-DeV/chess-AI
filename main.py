@@ -1,8 +1,10 @@
 import pygame, sys
+from math import inf
 from constants import *
 from board import Board
 from button import Button
 from pygame import mixer
+from AI import minimax
 
 # initialize all imported pygame modules
 pygame.init()
@@ -64,7 +66,7 @@ def menu():
                 if PLAY_BUTTON.check_for_input(mouse_pos):
                     if volume_status:
                         mixer.Sound("assets/sounds/select.mp3").play()
-                    game()
+                    select_mode()
                 if OPTIONS_BUTTON.check_for_input(mouse_pos):
                     if volume_status:
                         mixer.Sound("assets/sounds/select.mp3").play()
@@ -108,7 +110,7 @@ def options():
         PIECE_RECT = PIECE_SETUP.get_rect(center=(WIDTH/4, HEIGHT*3/10))
         SCREEN.blit(PIECE_SETUP, PIECE_RECT)
         # add to the screen the king of the set selected
-        SCREEN.blit(KINGS[index_folders[1]%len(KINGS)], (WIDTH*3/4-SQUARE_SIZE/2, HEIGHT*3/10-SQUARE_SIZE/2))
+        SCREEN.blit(KINGS[index_folders[1]%len(KINGS)], (WIDTH*3/4-SQUARE_SIZE/2, HEIGHT*3/10-SQUARE_SIZE/2-HEIGHT/55))
         # buttons for change the pieces set
         RIGHT_PIECE_BUTTON, LEFT_PIECE_BUTTON = Button.right_left_buttons(HEIGHT*3/10, light_theme)
         buttons.append(RIGHT_PIECE_BUTTON)
@@ -212,7 +214,50 @@ def options():
 
         pygame.display.update()
 
-def game():
+def select_mode():
+    while True:
+        if light_theme:
+            SCREEN.blit(LIGHT_BACKGROUND, (0, 0))
+        else:
+            SCREEN.blit(DARK_BACKGROUND, (0, 0))
+        mouse_pos = pygame.mouse.get_pos()
+
+        # buttons for playing against a friend or the computer
+        FRIEND_BUTTON, COMPUTER_BUTTON = Button.play_buttons(light_theme)
+
+        # button for come back to the main menu
+        BACK_BUTTON = Button((WIDTH*3/4, HEIGHT*9/10), "BACK",
+                    get_font(WIDTH//8), "Black" if light_theme else "White", "#636f87" if light_theme else "#99c0ff")
+
+        # change the color of the buttons if mouse goes over them
+        for button in [FRIEND_BUTTON, COMPUTER_BUTTON, BACK_BUTTON]:
+            button.change_color(mouse_pos)
+            button.draw(SCREEN)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if FRIEND_BUTTON.check_for_input(mouse_pos):
+                    if volume_status:
+                        mixer.Sound("assets/sounds/select.mp3").play()
+                    friend()
+                if COMPUTER_BUTTON.check_for_input(mouse_pos):
+                    if volume_status:
+                        mixer.Sound("assets/sounds/select.mp3").play()
+                    computer()
+                if BACK_BUTTON.check_for_input(mouse_pos):
+                    if volume_status:
+                        mixer.Sound("assets/sounds/select.mp3").play()
+                    return
+
+        pygame.display.update()
+
+'''
+player vs player
+'''
+def friend():
     # create a board giving the settings preferences like the pieces set, chessboard and colors for highlighting squares
     board = Board(folders_name(), volume_status)
     pygame.display.set_caption("CHESS")
@@ -231,11 +276,50 @@ def game():
                 mouse_pos = pygame.mouse.get_pos()
                 board.click(mouse_pos, SCREEN)
 
+        clock.tick(FPS)
+        pygame.display.update()
+
+    winner = "BLACK WINS" if board.turn == WHITE else "WHITE WINS"
+    # if the king isn't in check is draw
+    if Board.in_check(board.matrix, board.turn) == False:
+        winner = "DRAW"
+    end_screen(winner)
+
+'''
+player vs AI
+'''
+def computer():
+    # create a board giving the settings preferences like the pieces set, chessboard and colors for highlighting squares
+    board = Board(folders_name(), volume_status)
+    pygame.display.set_caption("CHESS")
+    
+    while True:
+        board.draw(SCREEN)
+        
+        if board.checkmate:
+            break
+
+        if board.turn == BLACK:
+            pygame.display.update()
+            move = minimax(board.copy(), 3, -inf, inf, BLACK)[0]
+            board.move(move[0], move[1], SCREEN)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if board.turn == WHITE:
+                    mouse_pos = pygame.mouse.get_pos()
+                    board.click(mouse_pos, SCREEN)
 
         clock.tick(FPS)
         pygame.display.update()
 
-    winner = "BLACK" if board.turn == WHITE else "WHITE"
+    winner = "BLACK WINS" if board.turn == WHITE else "WHITE WINS"
+    # if the king isn't in check is draw
+    if Board.in_check(board.matrix, board.turn) == False:
+        winner = "DRAW"
     end_screen(winner)
 
 def end_screen(winner : str):
@@ -247,7 +331,7 @@ def end_screen(winner : str):
         mouse_pos = pygame.mouse.get_pos()
 
         # caption with the winner
-        END_TITLE = get_font(WIDTH//8).render(winner+" WIN", True, "#000000" if light_theme else "#ffffff")
+        END_TITLE = get_font(WIDTH//8).render(winner, True, "#000000" if light_theme else "#ffffff")
         END_RECT = END_TITLE.get_rect(center=(WIDTH/2, HEIGHT/6+WIDTH//8))
         SCREEN.blit(END_TITLE, END_RECT)
 
@@ -267,7 +351,7 @@ def end_screen(winner : str):
                 if REMATCH_BUTTON.check_for_input(mouse_pos):
                     if volume_status:
                         mixer.Sound("assets/sounds/select.mp3").play()
-                    game()
+                    select_mode()
                 if MAIN_MENU_BUTTON.check_for_input(mouse_pos):
                     if volume_status:
                         mixer.Sound("assets/sounds/select.mp3").play()

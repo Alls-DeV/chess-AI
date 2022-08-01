@@ -35,6 +35,17 @@ class Button():
                                 pygame.font.Font("assets/font.otf", WIDTH//8), base_color, hovering_color)
         
         return PLAY_BUTTON, OPTIONS_BUTTON
+    
+    def play_buttons(light_theme : bool) -> tuple[Button, Button]:
+        base_color = "#000000" if light_theme else "#ffffff"
+        hovering_color = "#636f87" if light_theme else "#99c0ff"
+
+        FRIEND_BUTTON = Button((WIDTH/2, HEIGHT/3), "FRIEND",
+                            pygame.font.Font("assets/font.otf", WIDTH//8), base_color, hovering_color)
+        COMPUTER_BUTTON = Button((WIDTH/2, HEIGHT*2/3), "COMPUTER",
+                                pygame.font.Font("assets/font.otf", WIDTH//8), base_color, hovering_color)
+        
+        return FRIEND_BUTTON, COMPUTER_BUTTON
 
     def right_left_buttons(height : float, light_theme : bool) -> tuple[Button, Button]:
         base_color = "#000000" if light_theme else "#ffffff"

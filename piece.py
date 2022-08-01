@@ -5,9 +5,10 @@ from constants import *
 
 
 class Piece(ABC):
-    def __init__(self, color : str, image : pygame.Surface):
+    def __init__(self, color : str, value : int, image : pygame.Surface):
         self.color = color
         self.image = image
+        self.value = value
         self.move_set = set()
 
     '''
@@ -31,8 +32,8 @@ class Piece(ABC):
 
 
 class Pawn(Piece):
-    def __init__(self, color : str, image : pygame.Surface):
-        super().__init__(color, image)
+    def __init__(self, color : str, value : int, image : pygame.Surface):
+        super().__init__(color, value, image)
 
         # check if the pawn has moved
         self.first_move = True
@@ -59,8 +60,8 @@ class Pawn(Piece):
 
 
 class Rook(Piece):
-    def __init__(self, color : str, image : pygame.Surface):
-        super().__init__(color, image)
+    def __init__(self, color : str, value : int, image : pygame.Surface):
+        super().__init__(color, value, image)
 
         # flag for check if this rook can castle
         self.first_move = True
@@ -229,8 +230,8 @@ class Queen(Piece):
 
 
 class King(Piece):
-    def __init__(self, color : str, image : pygame.Surface):
-        super().__init__(color, image)
+    def __init__(self, color : str, value : int, image : pygame.Surface):
+        super().__init__(color, value, image)
 
         # flag for check if king can castle
         self.first_move = True
