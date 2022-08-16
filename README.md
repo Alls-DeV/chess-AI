@@ -33,7 +33,7 @@ python main.py
 
 ### Windows
 
-[python](https://www.python.org/downloads/release/python-365/)
+[python](https://www.python.org/downloads)
 
 ###### Make sure to add python to your PATH
 
