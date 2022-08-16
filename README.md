@@ -4,7 +4,6 @@ Chess game written in python with the pygame library.  The chess engine uses the
 * position of the piece
 * number of possible legal moves
 
----
 ## Setup Instructions:
 ###### Make sure you're using python 3
 
