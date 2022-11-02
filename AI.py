@@ -1,5 +1,4 @@
 from math import inf
-from types import NoneType
 from piece import Pawn, Rook, Knight, Bishop, Queen, King
 from board import Board
 from constants import *
