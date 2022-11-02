@@ -7,7 +7,7 @@ Chess game written in python with the pygame library.  The chess engine uses the
 ## Setup Instructions
 ###### Make sure you're using python 3
 
-### Ubuntu
+### Debian
 ```bash
 sudo apt install python3-pip
 pip3 -m install --user pygame
