@@ -10,14 +10,14 @@ Chess game written in python with the pygame library.  The chess engine uses the
 ### Debian
 ```bash
 sudo apt install python3-pip
-pip3 -m install --user pygame
+pip3 install pygame
 python3 main.py
 ```
 
 ### Arch
 ```bash
 sudo pacman -S python-pip
-pip -m install --user pygame
+pip install pygame
 python main.py
 ```
 ###### If pygame fails to install try:
