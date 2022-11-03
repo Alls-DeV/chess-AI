@@ -36,7 +36,7 @@ def minimax(matrix, depth, alpha, beta, maximizing_color):
     Minimax algorithm with alpha-beta pruning determines the best move from the current board
     '''
     if depth == 0:
-        return [NoneType, evaluate(matrix)]
+        return [type(None), evaluate(matrix)]
     best_move = -1
 
     # max player's turn
