@@ -118,39 +118,6 @@ Mobility refers to the number of legal moves available to each piece. It is cons
    python main.py
    ```
 
-### Using Virtual Environment (Recommended)
-
-1. Clone the repository:
-   ```
-   git clone https://github.com/your-username/chess-game.git
-   cd chess-game
-   ```
-
-2. Create a virtual environment:
-   ```
-   python3 -m venv chess_env
-   ```
-
-3. Activate the virtual environment:
-   - On Unix or MacOS:
-     ```
-     source chess_env/bin/activate
-     ```
-   - On Windows:
-     ```
-     chess_env\Scripts\activate
-     ```
-
-4. Install the required packages:
-   ```
-   pip install pygame
-   ```
-
-5. Run the game:
-   ```
-   python main.py
-   ```
-
 ### Without Virtual Environment
 
 If you prefer not to use a virtual environment, you can install Pygame globally:
@@ -179,58 +146,10 @@ The game offers various customization options:
 
 Access these options through the Options menu in the game.
 
-
-## Game Modes
-
-1. **Player vs Player**: Two human players can play against each other.
-2. **Player vs AI**: Play against the computer AI.
-
-## Customization
-
-![Menu](./assets/screenshots/options.png)
-
-The game offers various customization options:
-
-- Chessboard Designs: Choose from multiple board textures.
-- Piece Sets: Select different piece styles.
-- Highlight Colors: Customize colors for possible moves and the last move made.
-- Themes: Switch between light and dark themes.
-- Sound: Toggle game sounds on or off.
-
-Access these options through the Options menu in the game.
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
-## Additional Notes
-
-### Performance Considerations
-
-- Alpha-Beta Pruning significantly reduces the number of nodes evaluated in the search tree, improving performance.
-- Heuristic Evaluation is critical for the AI's effectiveness. The balance between material, position, and mobility affects the AI's playing style.
-
-### Future Improvements
-
-- Transposition Tables: Implement caching of board evaluations to avoid redundant calculations.
-- Opening Book: Implement an opening book to guide the AI's early moves.
-- Neural Networks: Implement the position evaluation using a neural network.
-- Parallel Search: Utilize multi-threading or multiprocessing to evaluate moves in parallel.
-- Endgame Database: Integrate an endgame database to handle specific scenarios and improve decision-making in complex positions.
-## Additional Notes
-
-### Performance Considerations
-
-- Alpha-Beta Pruning significantly reduces the number of nodes evaluated in the search tree, improving performance.
-- Heuristic Evaluation is critical for the AI's effectiveness. The balance between material, position, and mobility affects the AI's playing style.
-
-### Future Improvements
-
-- Transposition Tables: Implement caching of board evaluations to avoid redundant calculations.
-- Opening Book: Implement an opening book to guide the AI's early moves.
-- Neural Networks: Implement the position evaluation using a neural network.
-- Parallel Search: Utilize multi-threading or multiprocessing to evaluate moves in parallel.
-- Endgame Database: Integrate an endgame database to handle specific scenarios and improve decision-making in complex positions.
 ## Additional Notes
 
 ### Performance Considerations
