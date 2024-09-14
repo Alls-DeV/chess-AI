@@ -231,3 +231,17 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Neural Networks: Implement the position evaluation using a neural network.
 - Parallel Search: Utilize multi-threading or multiprocessing to evaluate moves in parallel.
 - Endgame Database: Integrate an endgame database to handle specific scenarios and improve decision-making in complex positions.
+## Additional Notes
+
+### Performance Considerations
+
+- Alpha-Beta Pruning significantly reduces the number of nodes evaluated in the search tree, improving performance.
+- Heuristic Evaluation is critical for the AI's effectiveness. The balance between material, position, and mobility affects the AI's playing style.
+
+### Future Improvements
+
+- Transposition Tables: Implement caching of board evaluations to avoid redundant calculations.
+- Opening Book: Implement an opening book to guide the AI's early moves.
+- Neural Networks: Implement the position evaluation using a neural network.
+- Parallel Search: Utilize multi-threading or multiprocessing to evaluate moves in parallel.
+- Endgame Database: Integrate an endgame database to handle specific scenarios and improve decision-making in complex positions.
