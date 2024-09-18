@@ -61,24 +61,11 @@ Each piece type is assigned a material value:
 The material value is the sum of these values for all pieces of each player.
 
 ### 2. Piece Position
-Positional values are assigned based on predefined tables (e.g., pawnEvalWhite, knightEval). These tables provide bonuses or penalties depending on where a piece is located on the board. The values are designed to:
+Positional values are assigned based on predefined tables. These tables provide bonuses or penalties depending on where a piece is located on the board. The values are designed to:
 
 - Encourage central control.
 - Promote piece development.
 - Penalize pieces on poor squares.
-
-Example of Positional Table for White Pawns (pawnEvalWhite):
-
-```
-[
-    [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
-    [5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
-    [1.0,  1.0,  2.0,  3.0,  3.0,  2.0,  1.0,  1.0],
-    [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
-    [-5.0, -5.0, -5.0, -5.0, -5.0, -5.0, -5.0, -5.0],
-    [-10.0, -10.0, -10.0, -10.0, -10.0, -10.0, -10.0, -10.0]
-]
-```
 
 ### 3. Mobility
 Mobility refers to the number of legal moves available to each piece. It is considered a minor factor and is weighted less heavily in the evaluation.
